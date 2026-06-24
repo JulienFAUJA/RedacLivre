@@ -1,0 +1,16 @@
+{
+  "id": "05",
+  "titre": "Gérer le contexte : la ressource qui décide de tout",
+  "intro": "Un agent ne raisonne bien que sur ce qu'il a sous les yeux. Trop peu de contexte et il invente ; trop et il se noie ou coûte cher. Ce chapitre durable explique comment l'agent acquiert, retient et perd du contexte, et comment tu peux le piloter activement plutôt que le subir.",
+  "plan": [
+    "Ce que l'agent garde en mémoire pendant une session",
+    "Comment l'agent va chercher du contexte (lecture de fichiers, recherche)",
+    "Fenêtre de contexte : limites, saturation, dégradation",
+    "Le fichier de mémoire projet : conventions et instructions persistantes",
+    "Repartir propre : quand et comment réinitialiser le contexte",
+    "Signes qu'il faut recadrer ou redémarrer une session"
+  ],
+  "depend_de": ["04"],
+  "longueur_cible": 2300,
+  "statut": "redige"
+}

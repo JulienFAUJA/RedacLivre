@@ -1,0 +1,178 @@
+%% Chapitre 05 — écrit par un subagent Rédacteur.
+%% RÈGLE : uniquement des commandes sémantiques bookforge. Aucun \chapter,
+%% \textbf, \emph, \begin{lstlisting}, \vspace... brut.
+
+\chapitre{Gérer le contexte : la ressource qui décide de tout}
+
+\introChapitre{
+  Un agent ne raisonne bien que sur ce qu'il a sous les yeux. Trop peu de
+  contexte et il invente ; trop et il se noie ou coûte cher. Ce chapitre
+  durable explique comment l'agent acquiert, retient et perd du contexte, et
+  comment tu peux le piloter activement plutôt que le subir.
+}
+
+\section{Ce que l'agent garde en tête pendant une session}
+
+\paragraphe{Au chapitre précédent, tu as appris à découper ton travail en
+tâches délégables. Mais une tâche bien formulée ne suffit pas : encore
+faut-il que l'agent ait, au bon moment, les bons éléments sous les yeux. C'est
+exactement le problème du contexte, et c'est là que beaucoup de délégations
+ratent. Tu donnes un but clair, puis l'agent répond à côté, non parce qu'il est
+bête, mais parce qu'il ne voit pas ce que toi tu vois.}
+
+\paragraphe{Pendant une session, le contexte de l'agent est un empilement.
+Il contient tes instructions, l'historique de l'échange, les fichiers qu'il a
+lus, les résultats des commandes qu'il a lancées. Tout cela s'accumule au fil
+des messages. L'agent ne raisonne que là-dessus : ce qui n'y figure pas
+n'existe pas pour lui. Un fichier que tu n'as pas mentionné et qu'il n'a pas
+ouvert ? Inconnu. Une décision prise oralement il y a deux jours ? Disparue.}
+
+\paragraphe{Retiens ce principe : \important{le contexte est une fenêtre, pas
+une mémoire totale.} L'agent ne connaît pas ton projet « en général ». Il
+connaît le morceau de projet qu'il a chargé dans cette session-ci. Ton rôle,
+c'est de décider quel morceau.}
+
+\section{Comment l'agent va chercher du contexte}
+
+\paragraphe{Bonne nouvelle : tu n'as pas à tout lui copier-coller. Un agent
+comme Claude Code va chercher lui-même ce dont il a besoin. Il liste
+les fichiers, lit ceux qui semblent pertinents, recherche un symbole ou une
+chaîne dans le dépôt, lance une commande pour observer un comportement. C'est
+toute la différence avec un simple chatbot : il agit pour s'informer avant
+d'agir pour produire.}
+
+\paragraphe{Mais cette autonomie a une contrepartie. L'agent explore à partir
+des indices que tu lui donnes. Si tu écris « corrige le bug d'authentification »
+sans plus, il devine où chercher, et il devine parfois mal : il ouvre dix
+fichiers, en lit trois de travers, et reconstitue une image approximative du
+système. Tu paies cette exploration en lenteur, en coût, et en risque
+d'erreur.}
+
+\begin{astuce}
+Amorce l'exploration au lieu de la laisser tâtonner. Nomme les fichiers ou
+dossiers concernés, donne le nom exact de la fonction, colle le message
+d'erreur complet. Tu ne fais pas le travail à sa place : tu lui évites de
+fouiller à l'aveugle, et tu obtiens une réponse plus juste, plus vite.
+\end{astuce}
+
+\paragraphe{Le bon réflexe n'est donc ni de tout fournir, ni de tout laisser
+deviner. C'est de \emphase{pointer} : indiquer le point d'entrée, puis laisser
+l'agent suivre le fil depuis là.}
+
+\section{La fenêtre de contexte : limites, saturation, dégradation}
+
+\paragraphe{Cet espace de travail a une taille maximale. On l'appelle la
+\terme{fenêtre de contexte} : la quantité d'information que l'agent peut garder
+active en même temps. Elle est grande, mais finie. Et au cours d'une longue
+session, on la remplit plus vite qu'on ne croit.}
+
+\paragraphe{Chaque fichier lu, chaque sortie de commande verbeuse, chaque
+aller-retour s'y entasse. Quand la fenêtre approche de la saturation, deux
+choses arrivent. D'abord, l'agent commence à \emphase{oublier} : les éléments
+les plus anciens de la conversation sortent de sa vue. La consigne précise que
+tu avais donnée au début ? Il ne l'a peut-être plus. Ensuite, même sans
+oubli franc, sa qualité se \emphase{dégrade} : noyé sous trop d'information, il
+peine à distinguer l'essentiel du bruit et ses réponses deviennent plus floues.}
+
+\begin{avertissement}
+Le symptôme typique d'une fenêtre saturée : l'agent répète une erreur que tu
+viens de corriger, redemande une information déjà donnée, ou contredit une
+décision prise plus tôt dans la même session. Ce n'est pas de la mauvaise
+volonté, c'est un débordement. Insister ne sert à rien : il faut alléger le
+contexte.
+\end{avertissement}
+
+\paragraphe{Comprendre cette limite change ta manière de travailler. Une
+session n'est pas un sac sans fond où entasser tout un projet. C'est un plan de
+travail de surface limitée. \important{Plus tu gardes ce plan dégagé, mieux
+l'agent travaille.}}
+
+\section{La mémoire projet : des instructions qui survivent à la session}
+
+\paragraphe{Certaines informations ne devraient jamais être réexpliquées à
+chaque session : tes conventions de code, les commandes pour tester, les
+pièges connus du dépôt, ce qu'il ne faut surtout pas toucher. Les répéter à la
+main serait absurde. C'est le rôle de la \terme{mémoire projet} : un fichier
+d'instructions persistantes, rangé dans le dépôt, que l'agent charge
+automatiquement au démarrage de chaque session sur ce projet.}
+
+\paragraphe{Tu y écris une fois ce qui vaut pour toujours. Par exemple :}
+
+\begin{extraitcode}{text}
+# Conventions du projet
+
+- Lance les tests avec `make test` avant de proposer un diff.
+- N'edite jamais les fichiers du dossier `generated/` : ils sont produits
+  automatiquement.
+- Style : fonctions courtes, pas de dependance nouvelle sans la justifier.
+- La logique metier vit dans `src/core/`, jamais dans les handlers HTTP.
+\end{extraitcode}
+
+\paragraphe{Cette mémoire devient le socle de contexte commun à toutes tes
+délégations. Tu n'as plus à rappeler « teste avant de me montrer le résultat » :
+c'est acquis. Mais garde-la \emphase{courte et vraie}. Une mémoire projet
+gonflée de détails périmés est pire que pas de mémoire : elle occupe la fenêtre
+et désinforme l'agent.}
+
+\begin{astuce}
+Traite la mémoire projet comme du code : relis-la, élague ce qui ne sert plus,
+corrige ce qui a changé. Une bonne règle : si une instruction t'a fait gagner
+du temps trois fois, elle mérite d'y figurer ; si tu ne la suis plus toi-même,
+elle doit en sortir.
+\end{astuce}
+
+\section{Repartir propre : réinitialiser le contexte}
+
+\paragraphe{Tôt ou tard, la session devient encombrée. Tu as exploré trois
+pistes, abandonné deux, fait des essais sans suite. Tout ce passé traîne dans
+le contexte et brouille l'agent. La solution n'est pas de continuer à pousser :
+c'est de \important{repartir propre}.}
+
+\paragraphe{Réinitialiser, c'est ouvrir une session neuve, vidée de l'historique
+accumulé. L'agent recharge la mémoire projet, mais oublie le fouillis de
+l'échange précédent. C'est libérateur : tu repars d'un plan de travail dégagé,
+avec une formulation enfin claire de ce que tu veux, débarrassée des fausses
+pistes.}
+
+\paragraphe{Le réflexe utile : quand tu changes de tâche, change de session.
+Garder une seule conversation interminable pour cinq sujets différents, c'est
+la garantie d'une fenêtre saturée et d'un agent confus. Une tâche délégable,
+une session propre. Avant de réinitialiser, capture juste ce qui mérite de
+survivre : dans la mémoire projet, dans une note, ou dans un diff déjà
+appliqué.}
+
+\section{Les signes qu'il faut recadrer ou redémarrer}
+
+\paragraphe{Apprends à reconnaître quand le contexte travaille contre toi. Voici
+les signaux qui doivent te faire réagir :}
+
+\begin{liste}
+  \element{L'agent répète une erreur que tu viens de corriger, ou redemande une
+  information déjà fournie : la fenêtre déborde.}
+  \element{Ses réponses deviennent vagues, génériques, comme s'il avait perdu le
+  fil de l'objectif : il est noyé.}
+  \element{Il s'accroche obstinément à une approche que tu as écartée : le passé
+  de la session le tire en arrière.}
+  \element{Tu passes plus de temps à le recadrer qu'à avancer : la session est
+  usée.}
+\end{liste}
+
+\paragraphe{Face à ces signaux, deux gestes. Le plus léger : \emphase{recadrer}
+sans tout jeter, en reformulant l'objectif et en repointant les bons fichiers.
+Le plus net : \emphase{redémarrer} une session propre quand le fouillis est trop
+épais. Ni l'un ni l'autre n'est un aveu d'échec ; piloter le contexte fait
+partie du métier de déléguer.}
+
+\resumeChapitre{
+  \element{\important{Fenêtre, pas mémoire} : l'agent ne connaît que ce qu'il a chargé dans la session en cours — tout le reste n'existe pas pour lui.}
+  \element{\important{Pointer, pas copier} : indique un chemin de fichier plutôt que de coller son contenu — l'agent lira la version réelle et courante.}
+  \element{\important{Saturation} : quand la fenêtre déborde, l'agent oublie les décisions anciennes et ses réponses se dégradent ; le symptôme est de répéter une erreur déjà corrigée.}
+  \element{\important{Mémoire projet} : écris dans un fichier versionné les conventions et contraintes durables du dépôt — l'agent les charge automatiquement à chaque session.}
+  \element{\important{Repartir propre} : change de session quand tu changes de tâche ; une tâche, une session — c'est le réflexe qui préserve la qualité du contexte.}
+}
+
+\paragraphe{Tu sais désormais donner à l'agent ce qu'il faut voir, ni plus ni
+moins, et reconnaître quand il faut faire le ménage. Reste la question qui
+décide de tout : comment savoir si ce qu'il te rend est juste ? Car même avec un
+contexte parfait, l'agent peut se tromper avec aplomb. Le chapitre suivant
+s'attaque à la vérification de son travail.}

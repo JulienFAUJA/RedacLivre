@@ -1,0 +1,16 @@
+{
+  "id": "13",
+  "titre": "Intégrer Claude Code dans ton workflow quotidien",
+  "intro": "Dernier chapitre : on assemble tout en habitudes durables. Comment l'agent prend sa place dans ta journée, ton dépôt et ton équipe, sans devenir une béquille ni un risque. On clôt sur une routine réaliste et sur la manière de continuer à progresser quand l'outil évoluera.",
+  "plan": [
+    "Une journée type avec un agent : où il aide, où tu gardes la main",
+    "Conventions de dépôt et d'équipe pour un usage partagé",
+    "Construire ses propres routines de délégation et de vérification",
+    "Mesurer si l'agent te fait vraiment gagner",
+    "Rester à jour quand l'outil change : principes vs détails",
+    "Plan de progression : tes prochaines semaines avec Claude Code"
+  ],
+  "depend_de": ["05", "06", "07", "11"],
+  "longueur_cible": 2200,
+  "statut": "redige"
+}

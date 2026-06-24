@@ -1,0 +1,179 @@
+%% ============================================================================
+%%  bookforge.sty — Commandes sémantiques pour la rédaction de livres
+%% ----------------------------------------------------------------------------
+%%  PRINCIPE : les agents rédacteurs n'utilisent QUE les commandes définies ici.
+%%  Aucune commande LaTeX brute de mise en page (\chapter, \textbf, \vspace,
+%%  \begin{lstlisting}, etc.) ne doit apparaître dans les fichiers de contenu.
+%%  Tout le « look » est délégué aux thèmes (theme-*.sty) et à code-listings.sty.
+%%
+%%  Conséquence : un livre se traduit en remplaçant uniquement le texte à
+%%  l'intérieur de ces commandes ; la mise en page reste identique.
+%% ============================================================================
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{bookforge}[2026/06/24 v0.1 Commandes semantiques BookForge]
+
+%% --- Dépendances de base ----------------------------------------------------
+%% Gestion de l'encodage selon le moteur. Sous lualatex/xelatex, on utilise
+%% fontspec (Unicode natif) : les caractères saisis directement en UTF-8, y
+%% compris les guillemets français « » et tous les accents, se composent
+%% correctement sans table de mappage. Sous pdflatex, on retombe sur la stack
+%% classique inputenc+fontenc+lmodern.
+\RequirePackage{iftex}
+\ifPDFTeX
+  \RequirePackage[utf8]{inputenc}
+  \RequirePackage[T1]{fontenc}
+  \RequirePackage{lmodern}
+\else
+  \RequirePackage{fontspec}       % Unicode natif (lualatex / xelatex)
+\fi
+\RequirePackage[french]{babel}
+\RequirePackage{xcolor}
+\RequirePackage{graphicx}
+\RequirePackage{hyperref}
+\RequirePackage{csquotes}
+\RequirePackage{xparse}           % \NewDocumentCommand : signatures robustes
+\RequirePackage{makeidx}
+\makeindex
+
+%% --- Options : choix de la langue principale du livre -----------------------
+%% \usepackage[langue=fr]{bookforge}
+\RequirePackage{kvoptions}
+\SetupKeyvalOptions{family=bf, prefix=bf@}
+\DeclareStringOption[fr]{langue}
+\ProcessKeyvalOptions{bf}
+
+%% ============================================================================
+%%  STRUCTURE DU LIVRE
+%% ============================================================================
+
+%% Titre du livre, sous-titre, auteur — alimentent la page de titre du thème.
+\NewDocumentCommand{\livreTitre}{m}{\def\bf@titre{#1}}
+\NewDocumentCommand{\livreSousTitre}{m}{\def\bf@soustitre{#1}}
+\NewDocumentCommand{\livreAuteur}{m}{\def\bf@auteur{#1}}
+\def\bf@titre{}\def\bf@soustitre{}\def\bf@auteur{}
+
+%% Page de titre (le rendu réel est fourni par le thème via \bf@rendreTitre).
+\NewDocumentCommand{\pageTitre}{}{%
+  \bf@rendreTitre
+}
+
+%% Table des matières sémantique.
+\NewDocumentCommand{\tableMatieres}{}{%
+  \cleardoublepage\tableofcontents\cleardoublepage
+}
+
+%% Introduction du livre (non numérotée, mais présente dans la TOC).
+%% Usage : \introLivre{ ... texte ... }
+\NewDocumentCommand{\introLivre}{+m}{%
+  \cleardoublepage
+  \chapter*{\bf@labelIntroLivre}%
+  \addcontentsline{toc}{chapter}{\bf@labelIntroLivre}%
+  \bf@introlivre@hook
+  #1
+}
+
+%% ============================================================================
+%%  CHAPITRES
+%% ============================================================================
+
+%% \chapitre{Titre du chapitre}
+%% Ouvre un nouveau chapitre. Le style visuel vient du thème.
+\NewDocumentCommand{\chapitre}{m}{%
+  \chapter{#1}%
+  \bf@chapitre@hook
+}
+
+%% \introChapitre{ ... }
+%% Intro d'un chapitre : bloc distinct placé juste après \chapitre.
+%% Visuellement traité par le thème (\bf@rendreIntroChap).
+\NewDocumentCommand{\introChapitre}{+m}{%
+  \bf@rendreIntroChap{#1}%
+}
+
+%% Sections / sous-sections sémantiques.
+%% On conserve \section natif (le thème le met en forme via \titleformat) et on
+%% fournit des alias francisés pour les niveaux inférieurs. On NE redéfinit PAS
+%% \section : le redéfinir casse les paquets qui le hookent (ex. listings).
+\NewDocumentCommand{\soussection}{m}{\subsection{#1}}
+\NewDocumentCommand{\soussoussection}{m}{\subsubsection{#1}}
+
+%% ============================================================================
+%%  PARAGRAPHES & BLOCS DE TEXTE
+%% ============================================================================
+
+%% \paragraphe{ ... } — paragraphe standard. On encapsule pour pouvoir
+%% appliquer un style global (interligne, indentation) depuis le thème.
+\NewDocumentCommand{\paragraphe}{+m}{%
+  \par #1\par
+}
+
+%% Mises en valeur SÉMANTIQUES (pas \textbf/\textit bruts) : le thème décide
+%% du rendu réel. Cela garde la traduction et le restylage triviaux.
+\NewDocumentCommand{\important}{m}{\bf@important{#1}}   % insistance forte
+\NewDocumentCommand{\emphase}{m}{\bf@emphase{#1}}      % emphase douce (italique)
+\NewDocumentCommand{\terme}{m}{\bf@terme{#1}\index{#1}} % terme + entrée d'index auto
+\NewDocumentCommand{\etranger}{m}{\bf@etranger{#1}}    % mot en langue étrangère
+
+%% \indexterm{mot} — indexe un mot sans le mettre en forme (usage libre dans le texte).
+\NewDocumentCommand{\indexterm}{m}{\index{#1}}
+
+%% Encadrés sémantiques : note, astuce, avertissement.
+%% \newenvironment classique (pas xparse) pour éviter les groupes supplémentaires
+%% qui déséquilibrent \begin{tcolorbox}/\end{tcolorbox}.
+\newenvironment{note}{\bf@boiteNote}{\end{tcolorbox}\vspace{0.8cm}}
+\newenvironment{astuce}{\bf@boiteAstuce}{\end{tcolorbox}\vspace{0.8cm}}
+\newenvironment{avertissement}{\bf@boiteAvert}{\end{tcolorbox}\vspace{0.8cm}}
+
+%% \resumeChapitre{...} — résumé des concepts clés en fin de chapitre.
+%% Argument = liste de \element{...} (même syntaxe que \begin{liste}).
+\NewDocumentCommand{\resumeChapitre}{+m}{\bf@rendreResume{#1}}
+
+%% ============================================================================
+%%  CITATIONS, LISTES, FIGURES
+%% ============================================================================
+%% `bloccitation` (et non `citation` : ce nom est déjà pris par LaTeX).
+\NewDocumentEnvironment{bloccitation}{O{}}{% argument optionnel = source
+  \def\bf@citsrc{#1}\bf@ouvrirCitation
+}{\bf@fermerCitation}
+
+\NewDocumentEnvironment{liste}{}{\begin{itemize}}{\end{itemize}}
+\NewDocumentEnvironment{listeNumerotee}{}{\begin{enumerate}}{\end{enumerate}}
+\NewDocumentCommand{\element}{+m}{\item #1}
+
+%% `\illustration` (et non `\figure` : nom susceptible d'être déjà pris).
+\NewDocumentCommand{\illustration}{m m}{% {chemin}{légende}
+  \bf@rendreFigure{#1}{#2}%
+}
+
+%% ============================================================================
+%%  LABELS (dépendent de la langue ; surchargeables par le thème/livre)
+%% ============================================================================
+\def\bf@labelIntroLivre{Introduction}
+
+%% ============================================================================
+%%  HOOKS PAR DÉFAUT (le thème les redéfinit ; fallbacks neutres ici)
+%% ============================================================================
+\providecommand{\bf@rendreTitre}{%
+  \begin{titlepage}\centering\vspace*{4cm}
+    {\Huge\bfseries \bf@titre\par}\vspace{1cm}
+    {\Large \bf@soustitre\par}\vspace{2cm}
+    {\large \bf@auteur\par}
+  \end{titlepage}}
+\providecommand{\bf@rendreIntroChap}[1]{\par\emph{#1}\par\bigskip}
+\providecommand{\bf@important}[1]{\textbf{#1}}
+\providecommand{\bf@emphase}[1]{\emph{#1}}
+\providecommand{\bf@terme}[1]{\emph{#1}}
+\providecommand{\bf@etranger}[1]{\emph{#1}}
+\providecommand{\bf@ouvrirEncadre}[1]{\par\medskip\noindent\textbf{[#1]}\par}
+\providecommand{\bf@fermerEncadre}{\par\medskip}
+\providecommand{\bf@ouvrirCitation}{\begin{quote}}
+\providecommand{\bf@fermerCitation}{\end{quote}}
+\providecommand{\bf@rendreFigure}[2]{%
+  \begin{figure}[htbp]\centering\includegraphics[width=.8\linewidth]{#1}%
+  \caption{#2}\end{figure}}
+\providecommand{\bf@chapitre@hook}{}
+\providecommand{\bf@introlivre@hook}{}
+\providecommand{\bf@rendreResume}[1]{%
+  \par\medskip\noindent\textbf{Points clés}\par\begin{itemize}#1\end{itemize}}
+
+\endinput

@@ -1,0 +1,180 @@
+%% Chapitre 06 — Vérifier le travail de l'agent
+%% RÈGLE : uniquement des commandes sémantiques bookforge. Aucun \chapter,
+%% \textbf, \emph, \begin{lstlisting}, \vspace... brut.
+
+\chapitre{Vérifier le travail de l'agent}
+
+\introChapitre{
+  Accepter un diff sans le comprendre, c'est signer un chèque en blanc. Ce
+  chapitre durable est le cœur de la promesse du livre : des méthodes concrètes
+  pour relire, tester et challenger ce que produit l'agent, sans devoir tout
+  réécrire à la main. Vérifier vite et bien est ce qui rend la délégation
+  rentable.
+}
+
+\section{Pourquoi la vérification n'est pas optionnelle}
+
+\paragraphe{Tu viens de voir que l'agent ne raisonne que sur ce qu'il a sous
+les yeux. Même parfaitement briefé, avec le bon contexte et une tâche bien
+bornée, il se trompe. Pas par malice : un agent produit ce qui ressemble
+statistiquement à du code correct, ce qui n'est pas la même chose que du code
+correct. La plupart du temps les deux coïncident. Parfois non, et c'est là que
+tu dois être présent.}
+
+\paragraphe{Le danger porte un nom : l'\terme{hallucination}. L'agent affirme
+qu'une fonction existe alors qu'elle n'existe pas, suppose un comportement
+d'API qu'il n'a jamais vérifié, ou déroule un raisonnement convaincant et faux.
+Le piège, c'est que ça \emphase{paraît} juste. Le code compile, se lit bien,
+porte les bons noms de variables. Un humain pressé valide.}
+
+\paragraphe{La vérification n'est donc pas une corvée de fin de tâche, c'est la
+moitié du travail de délégation. \important{Si vérifier te coûte plus cher que
+faire toi-même, tu n'as rien gagné.} Tout ce chapitre vise un seul objectif :
+rendre ta relecture rapide et fiable, pour que le temps gagné à déléguer ne
+soit pas reperdu à inspecter.}
+
+\section{Lire un diff efficacement}
+
+\paragraphe{Le diff est ton unité de contrôle. Ne le lis pas comme un texte,
+de haut en bas : lis-le par priorité. Trois questions, dans l'ordre.}
+
+\paragraphe{\important{Un : ai-je demandé exactement ça ?} Repère les fichiers
+touchés. Si tu attendais une modification dans un module et que l'agent en a
+changé trois autres, arrête-toi. Un diff plus large que la tâche est le premier
+signal d'alerte, avant même de lire une seule ligne de logique.}
+
+\paragraphe{\important{Deux : qu'est-ce qui a été supprimé ?} Les lignes
+ajoutées attirent l'\oe il ; ce sont les suppressions qui cassent la
+production. Un agent qui « nettoie » peut retirer une garde, un cas limite, un
+\code{try/catch} qui te semblait inutile mais protégeait d'un crash réel.}
+
+\paragraphe{\important{Trois : la logique tient-elle aux frontières ?} Concentre
+ta lecture sur les bornes : entrée vide, valeur nulle, collection à zéro
+élément, erreur réseau. C'est là que le code plausible se fissure.}
+
+\begin{astuce}
+Quand un diff est trop gros pour être relu sereinement, c'est un défaut de
+cadrage, pas de relecture. Renvoie l'agent découper son changement en
+plusieurs étapes plus petites, chacune vérifiable indépendamment. Un petit
+diff bien compris vaut mieux qu'un gros diff approuvé de confiance.
+\end{astuce}
+
+\section{Faire produire et exécuter des tests}
+
+\paragraphe{La relecture détecte ce que tu sais chercher. Les tests attrapent
+le reste. Le réflexe le plus rentable du livre tient en une phrase :
+\important{ne laisse pas l'agent te dire que ça marche, fais-le prouver.}}
+
+\paragraphe{Concrètement, demande le code et les tests dans le même mouvement,
+puis exige l'exécution réelle, pas une promesse.}
+
+\begin{extraitcode}{text}
+Ajoute la fonction parsePrice, puis écris des tests qui couvrent :
+prix entier, prix décimal, chaîne vide, devise inconnue.
+Lance la suite et colle-moi la sortie complète, pas un résumé.
+\end{extraitcode}
+
+\paragraphe{La nuance compte. Un agent à qui tu demandes « est-ce que ça
+passe ? » répondra volontiers « oui, tout est vert » — parfois sans avoir rien
+lancé. En exigeant la \emphase{sortie brute} du lanceur de tests, tu remplaces
+une affirmation par une preuve que tu peux relire.}
+
+\begin{avertissement}
+Méfie-toi des tests écrits par l'agent qui valident sa propre erreur. Si le
+code et le test partent de la même hypothèse fausse, ils s'accordent et le vert
+ment. Lis au moins les cas limites des tests : un test qui n'assère rien de
+gênant ne prouve rien.
+\end{avertissement}
+
+\paragraphe{Quand un bug existe déjà, inverse l'ordre : fais d'abord écrire un
+test qui échoue et reproduit le bug, puis demande le correctif. Le passage du
+rouge au vert est une preuve bien plus solide qu'un « c'est corrigé ».}
+
+\section{Demander à l'agent de justifier ses choix}
+
+\paragraphe{L'agent est un excellent relecteur de lui-même, à condition de le
+forcer à expliciter. Avant d'accepter un changement non trivial, demande-lui de
+défendre ses décisions. La question fait souvent remonter le doute que la
+relecture seule manque.}
+
+\begin{extraitcode}{text}
+Avant que je valide : explique pourquoi tu as choisi cette approche
+plutôt qu'une autre, et liste ce qui pourrait casser en production.
+Cite les lignes de code ou de doc sur lesquelles tu t'appuies.
+\end{extraitcode}
+
+\paragraphe{Le détail qui change tout, c'est l'exigence de \emphase{citer ses
+sources}. Un agent qui doit pointer la ligne exacte d'une API ne peut plus
+inventer son comportement aussi facilement. S'il répond « d'après la
+documentation, cette méthode renvoie null si... » sans pouvoir montrer où, tu
+tiens ton hallucination.}
+
+\begin{astuce}
+Demander « quels cas n'as-tu pas gérés ? » est souvent plus révélateur que
+« est-ce correct ? ». La première question invite l'agent à chercher ses
+propres trous ; la seconde l'invite à se rassurer.
+\end{astuce}
+
+\section{Repérer le code plausible mais faux}
+
+\paragraphe{Les hallucinations les plus dangereuses ne sont pas grossières,
+elles sont subtiles. Voici les formes que tu apprendras à flairer.}
+
+\begin{liste}
+  \element{\emphase{L'API inventée.} Une méthode au nom parfaitement crédible
+  — \code{user.getFullName()} — qui n'existe pas dans la bibliothèque. Le
+  réflexe : vérifier toute fonction externe que tu ne connais pas par c\oe ur.}
+  \element{\emphase{Le paramètre supposé.} Un appel avec un argument
+  plausible mais erroné (un ordre inversé, une unité en secondes au lieu de
+  millisecondes). Ça compile, ça tourne, ça donne un résultat faux.}
+  \element{\emphase{Le commentaire qui ment.} Le commentaire décrit ce que le
+  code \emphase{devrait} faire ; le code fait autre chose. Lis le code, pas le
+  commentaire.}
+  \element{\emphase{La gestion d'erreur cosmétique.} Un \code{catch} qui
+  avale l'exception sans rien traiter, juste pour faire propre.}
+\end{liste}
+
+\paragraphe{Le fil rouge : plus une ligne te paraît évidemment correcte sans
+que tu l'aies vérifiée, plus elle mérite ton attention. La confiance est le
+terrain de jeu de l'hallucination.}
+
+\section{Boucler la correction avec un retour précis}
+
+\paragraphe{Quand tu repères un défaut, la qualité de ton retour détermine la
+qualité du correctif. Un retour vague relance l'agent à l'aveugle ; un retour
+précis le remet sur les rails du premier coup. Compare.}
+
+\begin{extraitcode}{text}
+Mauvais retour :
+  « Ça ne marche pas, corrige. »
+
+Bon retour :
+  « parsePrice renvoie NaN sur l'entrée "" (chaîne vide).
+    Attendu : 0. Le test test_empty_string échoue.
+    Regarde la branche ligne 14, le cas vide n'est pas traité. »
+\end{extraitcode}
+
+\paragraphe{Le bon retour donne trois choses : le \emphase{symptôme} observé,
+le résultat \emphase{attendu}, et un \emphase{point d'ancrage} dans le code.
+Avec ça, l'agent n'a plus à deviner ton intention ; il corrige le bon endroit.}
+
+\paragraphe{Garde la boucle courte. Si après deux ou trois allers-retours
+l'agent tourne en rond — il « corrige » une chose et en casse une autre —
+c'est le signe que le contexte s'est embrouillé. Plutôt que d'insister, repars
+d'une session propre avec un brief resserré, ou reprends la main sur la partie
+qui résiste. Acharner l'agent coûte souvent plus cher que finir soi-même les
+dix dernières lignes.}
+
+\resumeChapitre{
+  \element{\important{Lire le diff par priorité} : vérifie d'abord que le périmètre est respecté, ensuite ce qui a été supprimé, enfin la logique aux frontières — entrée vide, valeur nulle, erreur réseau.}
+  \element{\important{Exiger la preuve} : ne laisse pas l'agent affirmer que ça marche — demande la sortie brute des tests, pas un résumé.}
+  \element{\important{Faire justifier} : demande à l'agent d'expliquer ses choix et de citer ses sources ; il ne peut plus inventer une API s'il doit pointer la ligne de doc.}
+  \element{\important{Code plausible mais faux} : une API inventée, un paramètre dans le mauvais ordre, un commentaire qui ment, un \code{catch} vide — plus c'est évident, plus ça mérite vérification.}
+  \element{\important{Retour précis} : donne le symptôme observé, le résultat attendu et un point d'ancrage dans le code — un retour vague relance l'agent à l'aveugle.}
+}
+
+\paragraphe{Tu sais maintenant contrôler ce que l'agent \emphase{a fait}.
+Reste à cadrer, en amont, ce qu'il a le \emphase{droit} de faire : quelles
+commandes il peut lancer, quels fichiers il peut toucher, ce qui exige ton
+approbation. C'est l'objet du chapitre suivant, où la vérification a posteriori
+laisse place aux garde-fous posés à l'avance.}

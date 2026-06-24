@@ -1,0 +1,16 @@
+{
+  "id": "07",
+  "titre": "Garde-fous, permissions et sécurité",
+  "intro": "Un agent qui peut écrire des fichiers et lancer des commandes peut aussi casser des choses. Ce chapitre mêle principes durables et réglages concrets : comment cadrer ce que l'agent a le droit de faire, isoler les opérations risquées, et garder une marche arrière. La confiance se construit sur des garde-fous, pas sur de l'espoir.",
+  "plan": [
+    "Le modèle de permissions : ce qui demande approbation, ce qui passe",
+    "Commandes dangereuses et opérations destructrices à encadrer",
+    "Travailler sur une branche : le filet de sécurité du versionnage",
+    "Isoler l'agent : répertoires de travail et bacs à sable",
+    "Secrets et données sensibles : ce qu'il ne faut jamais exposer",
+    "Définir tes propres règles d'autorisation et de refus"
+  ],
+  "depend_de": ["06"],
+  "longueur_cible": 2400,
+  "statut": "redige"
+}

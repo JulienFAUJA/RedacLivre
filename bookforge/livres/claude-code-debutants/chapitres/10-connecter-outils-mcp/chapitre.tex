@@ -1,0 +1,194 @@
+%% Chapitre 10 — Connecter des outils externes avec MCP
+%% RÈGLE : uniquement des commandes sémantiques bookforge.
+%% CHAPITRE DATÉ : l'écosystème MCP évolue vite.
+
+\chapitre{Connecter des outils externes avec MCP}
+
+\introChapitre{
+  Un agent gagne en puissance quand il peut parler à tes autres outils : base
+  de données, gestionnaire de tickets, documentation interne. Ce chapitre, daté
+  car l'écosystème évolue, explique le principe du protocole MCP et comment
+  brancher une première intégration utile sans se faire piéger par les questions
+  de confiance.
+}
+
+\section{Le problème que résout MCP}
+
+\paragraphe{Jusqu'ici, \code{Claude Code} agissait dans ton dépôt : il lisait
+des fichiers, lançait des commandes, modifiait du code. Le chapitre précédent a
+industrialisé ces gestes internes avec les slash commands et les hooks. Mais le
+travail réel déborde du dépôt. Le ticket qui décrit le bug vit dans Jira ou
+Linear. Le schéma exact d'une table vit dans ta base de données. La règle
+métier qui justifie une validation vit dans une page de documentation interne.}
+
+\paragraphe{Sans accès à ces sources, l'agent devine. Tu lui colles à la main un
+extrait de ticket, tu lui recopies une structure de table, tu lui décris une
+règle de mémoire. C'est du travail manuel, et chaque copier-coller approximatif
+augmente le risque d'hallucination : l'agent comble les trous avec du plausible.}
+
+\paragraphe{\important{MCP résout exactement ce problème : donner à l'agent un
+accès direct, structuré et réutilisable à des outils externes.} Au lieu de
+décrire le monde à l'agent, tu le branches dessus.}
+
+\section{Le principe : serveurs, outils, et l'agent qui appelle}
+
+\paragraphe{\terme{MCP} signifie \etranger{Model Context Protocol} : un protocole
+standard qui décrit comment un agent dialogue avec des sources externes. Standard
+est le mot clé. Avant lui, chaque intégration était du sur-mesure ; aujourd'hui
+n'importe quel outil qui parle MCP se branche de la même façon.}
+
+\paragraphe{La brique concrète est le \terme{serveur MCP}. C'est un petit
+programme qui se place entre l'agent et un système précis (ta base, ton
+gestionnaire de tickets) et qui expose des \emphase{outils} : des actions nommées
+avec des paramètres clairs, comme \code{rechercher_ticket} ou
+\code{executer_requete_sql}. L'agent ne voit pas la plomberie ; il voit une liste
+d'outils disponibles, leur description, et il les appelle quand la tâche le
+demande.}
+
+\paragraphe{Le cycle est simple. Tu configures un serveur, \code{Claude Code} se
+connecte au démarrage de la session et récupère la liste des outils exposés.
+Pendant ton travail, si l'agent juge qu'un outil l'aide, il l'appelle, lit le
+résultat, et continue son raisonnement avec cette information fraîche dans son
+contexte. Tu n'as rien à recopier.}
+
+\paragraphe{Un serveur tourne en local, lancé comme un sous-processus sur ta
+machine, ou à distance, exposé derrière une adresse réseau. Le local convient
+pour un outil qui agit sur ton poste ; le distant, pour un service partagé par
+toute l'équipe. Dans les deux cas, l'agent les voit de la même manière : une
+liste d'outils. C'est tout l'intérêt d'un protocole standard, tu raisonnes en
+\emphase{capacités}, pas en tuyauterie.}
+
+\section{Brancher un premier serveur MCP}
+
+\paragraphe{La configuration tient dans un fichier. Tu déclares chaque serveur :
+un nom, la commande qui le lance, et ses éventuels paramètres. Voici une
+intégration de recherche documentaire, branchée sur tes pages internes.}
+
+\begin{extraitcode}{json}
+{
+  "mcpServers": {
+    "docs-interne": {
+      "command": "npx",
+      "args": ["-y", "@exemple/mcp-docs"],
+      "env": {
+        "DOCS_URL": "https://wiki.interne.exemple",
+        "DOCS_TOKEN": "${DOCS_TOKEN}"
+      }
+    }
+  }
+}
+\end{extraitcode}
+
+\paragraphe{Note le \code{$DOCS_TOKEN} : le secret ne vit pas en clair dans le
+fichier, il vient d'une variable d'environnement. On verra plus loin pourquoi ce
+réflexe compte. Une fois le fichier en place, tu vérifies que le serveur est bien
+vu par l'agent.}
+
+\begin{extraitcode}{bash}
+# Lister les serveurs MCP connus de la session
+claude mcp list
+
+# Demarrer une session et inspecter les outils charges
+claude
+> /mcp
+\end{extraitcode}
+
+\paragraphe{Si le serveur apparaît avec ses outils, c'est branché. Demande alors
+quelque chose de concret : \emphase{cherche dans la doc interne la politique de
+nommage des branches}. L'agent appelle l'outil de recherche au lieu d'inventer.}
+
+\begin{avertissement}
+Les noms exacts de commandes, de fichiers de configuration et de paquets MCP
+changent vite : l'écosystème est jeune et bouge à chaque version de
+\code{Claude Code}. Considère les exemples ci-dessus comme une illustration du
+\emphase{principe}, pas comme une référence figée. Le réflexe durable : lance
+\code{claude mcp --help} et consulte la documentation de la version que tu as
+réellement installée avant de copier une configuration trouvée ailleurs.
+\end{avertissement}
+
+\section{Choisir des intégrations fiables et limiter les permissions}
+
+\paragraphe{Brancher un serveur MCP, c'est inviter du code tiers à agir au cœur
+de ta session. Avant d'en ajouter un, pose-toi deux questions : \emphase{qui l'a
+écrit}, et \emphase{de quoi a-t-il vraiment besoin}.}
+
+\paragraphe{Pour la provenance, privilégie les serveurs officiels d'un éditeur ou
+ceux d'une source largement utilisée et auditée. Un dépôt inconnu avec trois
+étoiles, qui demande un jeton d'accès large, mérite la méfiance. Lis ce qu'il
+exécute avant de lui confier tes identifiants.}
+
+\paragraphe{Pour les besoins, applique le principe du moindre privilège, qui
+prolonge directement les permissions vues au chapitre des garde-fous. Un serveur
+de tickets a besoin de lire et commenter, rarement de supprimer. Un serveur de
+base de données peut souvent se contenter d'un accès en lecture seule.}
+
+\paragraphe{Cadrer un serveur ne s'arrête pas au compte qu'il utilise : tu peux
+aussi décider, côté agent, quels de ses outils tu autorises sans confirmation. Un
+outil de lecture peut tourner librement ; un outil qui écrit ou supprime devrait
+rester soumis à ton aval explicite, exactement comme une commande shell sensible.
+Le serveur définit ce qui est \emphase{possible} ; tes permissions définissent ce
+qui passe \emphase{sans te demander}.}
+
+\begin{astuce}
+Crée un compte ou un jeton dédié à chaque serveur MCP, avec le strict minimum de
+droits, plutôt que de réutiliser ton compte personnel d'administrateur. Si un
+serveur dérape ou fuit son jeton, les dégâts restent bornés à ce périmètre, et tu
+peux le révoquer sans casser le reste de ton outillage.
+\end{astuce}
+
+\section{Cas concrets : tickets, base de données, documentation}
+
+\paragraphe{Le \emphase{gestionnaire de tickets} est souvent la première
+intégration rentable. Tu donnes une référence et l'agent va lire le ticket
+lui-même : description, commentaires, critères d'acceptation. Demande
+« implémente ce que décrit le ticket PROJ-241 », et il récupère le contexte avant
+de toucher au code. Limite-le à la lecture et au commentaire ; ne le laisse pas
+fermer ou réassigner sans ton aval.}
+
+\paragraphe{La \emphase{base de données} évite à l'agent d'halluciner un schéma.
+Au lieu de supposer qu'une colonne s'appelle \code{user_id}, il interroge la
+structure réelle et écrit une requête correcte du premier coup. Branche-le en
+lecture seule, sur une réplique ou une base de développement, jamais directement
+sur la production en écriture.}
+
+\paragraphe{La \emphase{recherche documentaire} ancre l'agent dans tes décisions
+maison. Conventions de code, choix d'architecture, runbook d'incident : l'agent
+cite la source au lieu d'inventer une bonne pratique générique. C'est un
+complément naturel à la mémoire projet, pour ce qui est trop volumineux ou trop
+mouvant pour tenir dans un fichier d'instructions.}
+
+\section{Risques de confiance et bonnes pratiques de cadrage}
+
+\paragraphe{Un serveur MCP n'est pas un simple lecteur passif : il peut renvoyer
+du texte qui influence l'agent. Un ticket, une page de doc ou une ligne de base
+peuvent contenir des instructions glissées par un tiers. L'agent, qui lit tout
+comme du contexte, risque de les suivre. C'est le cœur du problème de confiance.}
+
+\begin{avertissement}
+Ne branche que des serveurs MCP de confiance, et traite toute donnée externe
+comme potentiellement hostile. Un serveur malveillant ou compromis peut exfiltrer
+ton code, vider un jeton d'accès ou pousser l'agent à exécuter une commande
+dangereuse via une instruction cachée dans un ticket ou une page web. Trois
+garde-fous : n'installe que des serveurs dont tu connais l'auteur, donne-leur le
+moins de droits possible, et garde la confirmation des actions sensibles plutôt
+que de tout autoriser d'un bloc.
+\end{avertissement}
+
+\paragraphe{Le bon cadrage n'est pas de tout interdire, mais de doser. Commence
+avec une seule intégration, en lecture seule, sur des données non critiques.
+Observe comment l'agent s'en sert, vérifie ses appels d'outils comme tu vérifies
+ses diffs, puis élargis le périmètre une fois la confiance établie.}
+
+\resumeChapitre{
+  \element{\important{MCP} : un protocole standard qui permet à l'agent d'appeler des outils externes (tickets, base de données, documentation) sans que tu recopies le contexte à la main.}
+  \element{\important{Serveur MCP} : un petit programme qui expose des actions nommées — l'agent voit une liste de capacités, pas la plomberie derrière.}
+  \element{\important{Moindre privilège} : crée un compte dédié par serveur avec le strict minimum de droits — lecture seule là où l'écriture n'est pas nécessaire.}
+  \element{\important{Données externes comme contexte hostile} : un ticket ou une page de doc peut contenir des instructions glissées par un tiers — n'installe que des serveurs de confiance.}
+  \element{\important{Progressivité} : commence par une seule intégration en lecture sur des données non critiques, observe les appels d'outils comme tu lis un diff, puis élargis.}
+}
+
+\paragraphe{Avec MCP, ton agent cesse d'être enfermé dans le dépôt : il touche à
+tout ton environnement de travail. Cette portée nouvelle appelle une nouvelle
+montée en puissance. Jusqu'ici, un seul agent menait toute la tâche ; au chapitre
+suivant, on apprend à en faire travailler plusieurs ensemble, à déléguer des
+parties d'un chantier à des subagents et à orchestrer leur effort.}

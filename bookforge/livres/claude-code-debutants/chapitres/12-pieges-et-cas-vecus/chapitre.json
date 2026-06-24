@@ -1,0 +1,16 @@
+{
+  "id": "12",
+  "titre": "Pièges, cas vécus et comment s'en sortir",
+  "intro": "Ce chapitre rassemble les histoires qui font mal : l'agent qui boucle, qui supprime trop, qui ment avec aplomb, qui part dans le décor. Pour chaque piège, un signal d'alerte, une cause, et une manœuvre de récupération. C'est l'expérience qu'on n'a pas envie d'acquérir au prix fort.",
+  "plan": [
+    "L'agent qui boucle ou s'enlise : reconnaître et couper",
+    "Suppressions et modifications excessives : récupérer la situation",
+    "Le code confiant mais faux : pourquoi on se fait avoir",
+    "Dérive de contexte : quand l'agent perd le fil",
+    "Sur-confiance du développeur : le piège du pilote automatique",
+    "Boîte à outils de récupération : annuler, recadrer, repartir"
+  ],
+  "depend_de": ["06", "07"],
+  "longueur_cible": 2300,
+  "statut": "redige"
+}

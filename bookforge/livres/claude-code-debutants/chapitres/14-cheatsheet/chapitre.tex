@@ -1,0 +1,195 @@
+%% Chapitre 14 — Cheat-sheet : commandes et raccourcis essentiels
+%% RÈGLE : uniquement des commandes sémantiques bookforge.
+
+\chapitre{Cheat-sheet : l'essentiel en un coup d'œil}
+
+\introChapitre{
+  Toutes les commandes, raccourcis et patterns utiles au quotidien, regroupés
+  pour une consultation rapide. À garder sous la main lors de tes premières
+  semaines avec Claude Code.
+}
+
+\section{Démarrage et navigation}
+
+\paragraphe{Les commandes de base pour lancer et piloter une session :}
+
+\begin{extraitcode}{bash}
+# Lancer Claude Code dans le répertoire courant
+claude
+
+# Lancer avec une tâche directe (mode non-interactif)
+claude -p "Décris la structure du projet"
+
+# Reprendre la dernière session
+claude --continue
+
+# Reprendre une session spécifique
+claude --resume
+\end{extraitcode}
+
+\begin{extraitcode}{bash}
+# Dans une session : commandes slash essentielles
+/help          # Liste toutes les commandes disponibles
+/clear         # Vider le contexte de la session en cours
+/compact       # Résumer et compresser l'historique
+/memory        # Afficher ou éditer la mémoire projet
+/cost          # Afficher le coût de la session en cours
+/exit          # Quitter proprement
+\end{extraitcode}
+
+\section{Gérer les permissions}
+
+\paragraphe{Contrôler ce que Claude Code peut faire sans te demander :}
+
+\begin{extraitcode}{bash}
+# Autoriser une commande spécifique pour la session
+/allowed-tools
+
+# Lancer en mode lecture seule (aucune modification)
+claude --no-write
+
+# Lancer en mode autonome (approuve tout automatiquement)
+# À réserver aux pipelines CI, jamais en interactif
+claude --dangerously-skip-permissions
+\end{extraitcode}
+
+\begin{avertissement}
+\code{--dangerously-skip-permissions} supprime toutes les confirmations. Ne
+l'utilise qu'en environnement isolé (conteneur, CI) sur du code que tu peux
+jeter. Jamais sur ta machine de développement principale.
+\end{avertissement}
+
+\section{Fichier CLAUDE.md — mémoire projet}
+
+\paragraphe{Le fichier \code{CLAUDE.md} à la racine du dépôt est chargé
+automatiquement à chaque session. Structure recommandée :}
+
+\begin{extraitcode}{text}
+# Conventions du projet
+
+## Commandes essentielles
+- Tests : `make test` ou `npm test`
+- Lint : `make lint`
+- Build : `make build`
+
+## Règles absolues
+- Ne jamais modifier `generated/` (fichiers auto-produits)
+- Toujours tester avant de proposer un diff
+- Nouvelle dépendance = justification obligatoire
+
+## Architecture
+- Logique métier dans `src/core/`
+- Handlers HTTP dans `src/api/`
+- Tests dans `tests/` (miroir de `src/`)
+\end{extraitcode}
+
+\begin{astuce}
+Garde le \code{CLAUDE.md} sous 200 lignes. Au-delà, il occupe trop de fenêtre
+de contexte pour chaque session. L'essentiel seulement : ce qui change le
+comportement de l'agent par rapport à ses défauts.
+\end{astuce}
+
+\section{Patterns de délégation efficaces}
+
+\paragraphe{Formulations qui donnent de bons résultats systématiquement :}
+
+\begin{extraitcode}{text}
+# Pattern 1 — Bug précis
+"Dans `src/auth/login.ts` ligne 47, la fonction `validateToken`
+retourne toujours true. Message d'erreur : [coller]. Corrige uniquement
+cette fonction, ne touche pas aux tests."
+
+# Pattern 2 — Nouvelle fonctionnalité bornée
+"Ajoute une fonction `formatDate(date: Date): string` dans
+`src/utils/date.ts`. Format attendu : 'DD/MM/YYYY'. Ajoute un test
+unitaire dans `tests/utils/date.test.ts`."
+
+# Pattern 3 — Refactorisation contrôlée
+"Extrais la logique de validation de `src/api/users.ts` dans un
+fichier `src/core/validation.ts`. Ne change pas le comportement
+observable, uniquement la structure."
+\end{extraitcode}
+
+\section{Vérification du travail — réflexes}
+
+\paragraphe{À faire systématiquement après chaque délégation :}
+
+\begin{liste}
+  \element{Lire le diff proposé avant d'accepter — \code{git diff} ou la
+  prévisualisation intégrée.}
+  \element{Lancer les tests : une modification qui casse les tests est à
+  refuser, même si « elle a l'air bonne ».}
+  \element{Vérifier que le périmètre n'a pas débordé : l'agent n'a modifié
+  que ce qu'on lui avait demandé.}
+  \element{Pour les modifications de logique, tester le cas nominal \emphase{et}
+  les cas limites à la main.}
+\end{liste}
+
+\section{Hooks utiles}
+
+\paragraphe{Exemples de hooks à placer dans \code{.claude/settings.json} :}
+
+\begin{extraitcode}{json}
+{
+  "hooks": {
+    "PreToolUse": [{
+      "matcher": "Bash",
+      "hooks": [{
+        "type": "command",
+        "command": "echo '[Hook] Commande : $CLAUDE_TOOL_INPUT_COMMAND'"
+      }]
+    }],
+    "PostToolUse": [{
+      "matcher": "Edit",
+      "hooks": [{
+        "type": "command",
+        "command": "npm run lint --silent 2>&1 | head -5"
+      }]
+    }]
+  }
+}
+\end{extraitcode}
+
+\section{Commandes MCP courantes}
+
+\begin{extraitcode}{bash}
+# Lister les serveurs MCP connectés
+claude mcp list
+
+# Ajouter un serveur MCP local
+claude mcp add mon-outil -- node /chemin/vers/server.js
+
+# Ajouter un serveur MCP distant (SSE)
+claude mcp add mon-api --transport sse https://api.exemple.com/mcp
+\end{extraitcode}
+
+\section{Surveillance des coûts}
+
+\begin{extraitcode}{bash}
+# Coût de la session courante (dans la session)
+/cost
+
+# Voir l'usage via l'API Anthropic
+# → console.anthropic.com/usage
+\end{extraitcode}
+
+\begin{note}
+Les sessions longues avec beaucoup de fichiers lus coûtent plus cher que les
+sessions courtes et ciblées. Si une session dépasse 15 minutes sur une seule
+tâche, c'est souvent le signe qu'il faut la découper.
+\end{note}
+
+\resumeChapitre{
+  \element{\important{Démarrage} : \code{claude} pour une session interactive,
+  \code{claude -p "..."} pour une tâche directe, \code{claude --continue} pour
+  reprendre.}
+  \element{\important{Contexte} : \code{/clear} vide la session, \code{/compact}
+  compresse, \code{CLAUDE.md} persiste les conventions du projet.}
+  \element{\important{Permissions} : configurer dans \code{.claude/settings.json}
+  ce qui s'exécute sans confirmation ; \code{--dangerously-skip-permissions} pour
+  la CI uniquement.}
+  \element{\important{Vérification} : lire le diff, lancer les tests, contrôler
+  le périmètre — à chaque délégation, sans exception.}
+  \element{\important{Coûts} : \code{/cost} en session, sessions courtes et
+  ciblées pour maîtriser la facture.}
+}

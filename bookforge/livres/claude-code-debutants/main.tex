@@ -1,0 +1,45 @@
+%% ============================================================================
+%%  main.tex — Squelette du livre « Claude Code en pratique ».
+%%  Ne contient PAS de contenu : seulement l'assemblage. Les agents écrivent
+%%  dans frontmatter/ et chapitres/.
+%% ============================================================================
+\documentclass[11pt,openright]{book}
+
+%% Les styles sont cherchés dans ../../styles (voir build.ps1 : TEXINPUTS).
+\usepackage[langue=fr]{bookforge}
+\usepackage{code-listings}
+\usepackage{theme-technique}
+
+%% --- Métadonnées du livre (alimentées depuis livre.json par l'orchestrateur)
+\livreTitre{Claude Code en pratique}
+\livreSousTitre{Du premier prompt à l'orchestration d'agents — guide concret pour développeurs, édition 2026}
+\livreAuteur{Système BookForge}
+
+\begin{document}
+
+\frontmatter
+\pageTitre
+\tableMatieres
+\input{frontmatter/intro-livre.tex}
+
+\mainmatter
+\input{chapitres/01-ce-quest-un-agent/chapitre.tex}
+\input{chapitres/02-installation-premier-lancement/chapitre.tex}
+\input{chapitres/03-premiere-tache-reelle/chapitre.tex}
+\input{chapitres/04-penser-en-taches-deleguables/chapitre.tex}
+\input{chapitres/05-gerer-le-contexte/chapitre.tex}
+\input{chapitres/06-verifier-le-travail/chapitre.tex}
+\input{chapitres/07-garde-fous-permissions/chapitre.tex}
+\input{chapitres/08-cout-et-budget/chapitre.tex}
+\input{chapitres/09-commandes-et-automatisations/chapitre.tex}
+\input{chapitres/10-connecter-outils-mcp/chapitre.tex}
+\input{chapitres/11-subagents-et-orchestration/chapitre.tex}
+\input{chapitres/12-pieges-et-cas-vecus/chapitre.tex}
+\input{chapitres/13-workflow-quotidien/chapitre.tex}
+\input{chapitres/14-cheatsheet/chapitre.tex}
+
+\backmatter
+\input{backmatter/glossaire.tex}
+\printindex
+
+\end{document}

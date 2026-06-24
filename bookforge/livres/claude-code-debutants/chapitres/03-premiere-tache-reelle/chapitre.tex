@@ -1,0 +1,255 @@
+%% Chapitre 03 — « Ta première tâche réelle déléguée »
+%% RÈGLE : uniquement des commandes sémantiques bookforge. Aucun \chapter,
+%% \textbf, \begin{lstlisting}, \vspace... brut.
+
+\chapitre{Ta première tâche réelle déléguée}
+
+\introChapitre{
+  Fini les essais à blanc : on confie à l'agent une vraie petite tâche sur du
+  vrai code. L'objectif n'est pas le résultat parfait mais d'observer comment
+  l'agent explore, propose, modifie — et de prendre le réflexe de relire avant
+  d'accepter. C'est ici que naît la confiance mesurée.
+}
+
+\section{Choisir une bonne première tâche}
+
+\paragraphe{Au chapitre précédent, tu as installé Claude Code, lancé une
+première session et repéré l'interface. Tout cela restait à blanc : on
+regardait l'agent répondre, sans rien lui faire toucher. Place maintenant à du
+concret. On va lui confier une vraie modification sur un vrai dépôt, et tu vas
+décider, ligne par ligne, ce qui entre dans ton code.}
+
+\paragraphe{La première tâche que tu délègues n'a pas vocation à t'impressionner.
+Elle a vocation à t'apprendre à lire l'agent. Choisis donc quelque chose de
+petit, de vérifiable et de peu risqué. Petit : quelques fichiers au plus, pas
+une refonte. Vérifiable : tu sais dire si c'est juste, idéalement en lançant un
+test ou en relisant à l'œil. Peu risqué : si ça part en vrille, tu jettes le
+travail sans avoir cassé ta journée.}
+
+\paragraphe{Quelques candidates idéales pour un premier vol :}
+
+\begin{liste}
+  \element{Ajouter une fonction utilitaire isolée, avec son test.}
+  \element{Corriger un message d'erreur trompeur ou une faute dans la
+  documentation.}
+  \element{Extraire une portion de code dupliquée dans une fonction partagée.}
+  \element{Couvrir d'un test un cas limite oublié.}
+\end{liste}
+
+\paragraphe{Ce qu'il faut éviter pour un premier essai : tout ce qui touche à
+la sécurité, à la facturation, aux migrations de base de données, ou qui
+s'étale sur dix fichiers couplés. Ces tâches sont déléguables aussi, mais plus
+tard, quand tu auras le réflexe de relecture bien ancré.}
+
+\begin{astuce}
+Travaille sur une branche dédiée, ou au minimum sur un dépôt dont l'état est
+propre (\code{git status} ne montre rien en attente). Ainsi, quoi que propose
+l'agent, un \code{git diff} ou un \code{git checkout .} te ramène à zéro en une
+commande. C'est ton filet de sécurité le plus simple, et le plus efficace.
+\end{astuce}
+
+\section{Le dépôt-exemple : formuler une intention, pas des instructions}
+
+\paragraphe{Prenons un dépôt concret pour la suite du chapitre. Imagine une
+petite API en Python, \code{ledger}, qui tient des comptes : un module
+\code{accounts.py} avec une fonction \code{transfer(src, dst, amount)} qui
+déplace un montant d'un compte à l'autre. Un détail t'agace : quand le montant
+est négatif, la fonction l'accepte sans broncher et crédite le mauvais compte.
+Tu veux qu'un montant négatif ou nul soit refusé proprement.}
+
+\paragraphe{Le réflexe du débutant, c'est de dicter la solution : « ajoute un
+\code{if amount <= 0} au début de \code{transfer} et lève un
+\code{ValueError} ». Ça marche, mais tu te prives de l'agent. Tu lui imposes ta
+première idée alors qu'il pourrait repérer que la même validation manque
+ailleurs, ou qu'il existe déjà une exception maison pour ce genre de cas.}
+
+\paragraphe{Formule plutôt une \important{intention} : le but, et le critère de
+réussite. Laisse l'agent décider du « comment » après avoir lu le code. Une
+demande bien calibrée ressemble à ceci :}
+
+\begin{extraitcode}{text}
+Dans accounts.py, transfer() accepte des montants négatifs ou nuls et
+produit des transferts incohérents. Refuse ces montants avec une erreur
+claire. Regarde d'abord comment le reste du module signale ses erreurs
+pour rester cohérent, et ajoute un test qui couvre le cas du montant nul
+et du montant négatif.
+\end{extraitcode}
+
+\paragraphe{Remarque ce qu'on a donné : une intention nette (refuser les
+montants invalides), un critère de réussite (un test qui passe), et une
+consigne de cohérence (s'aligner sur l'existant). On n'a pas dicté le nom de
+l'exception ni l'emplacement exact du \code{if}. C'est l'agent qui va le
+déterminer en lisant — et c'est exactement ce qu'on veut observer.}
+
+\section{Observer l'agent explorer et proposer un plan}
+
+\paragraphe{Une fois la demande envoyée, l'agent ne se jette pas sur le clavier.
+Comme on l'a vu au premier chapitre, il agit en boucle : il lit, il raisonne,
+il agit. Sa première action ici est presque toujours d'explorer le dépôt pour
+se constituer un contexte. Tu le vois lire des fichiers, parfois lancer une
+recherche dans le code, avant même d'écrire la moindre ligne.}
+
+\paragraphe{Dans notre exemple, la session ressemble à ceci :}
+
+\begin{extraitcode}{text}
+> Je regarde accounts.py pour comprendre transfer() et le style d'erreurs.
+  [lecture de accounts.py]
+  [lecture de errors.py]
+  [recherche « raise » dans le module]
+
+Le module définit déjà une exception InvalidAmount dans errors.py,
+utilisée par withdraw(). transfer() ne fait aucune validation. Je vais :
+  1. valider amount > 0 au début de transfer(), en levant InvalidAmount ;
+  2. ajouter deux tests dans test_accounts.py (montant nul, négatif).
+Je te montre le changement avant de l'appliquer.
+\end{extraitcode}
+
+\paragraphe{Cet instant vaut de l'or. L'agent a trouvé tout seul l'exception
+\code{InvalidAmount} que tu avais peut-être oubliée, et il s'aligne dessus au
+lieu d'inventer un \code{ValueError} générique. C'est le bénéfice direct de
+l'intention plutôt que de la micro-instruction : il a comblé un manque de ton
+contexte à toi.}
+
+\begin{note}
+Lis toujours le plan annoncé avant le code. Un plan qui parle de fichiers que
+tu ne t'attendais pas à voir touchés est un signal d'alarme précoce : tu peux
+recadrer immédiatement, avant qu'une seule ligne ne soit écrite. C'est bien
+moins coûteux que de défaire un changement déjà appliqué.
+\end{note}
+
+\section{Lire un diff et décider}
+
+\paragraphe{L'agent passe ensuite à l'action et te présente ses modifications
+sous forme de \terme{diff} : une vue ligne par ligne de ce qu'il ajoute et de
+ce qu'il retire. Les lignes précédées d'un \code{+} sont ajoutées, celles
+précédées d'un \code{-} sont supprimées ; le reste est du contexte inchangé,
+affiché pour que tu te repères. C'est l'unité de base que tu vas relire et
+approuver pendant tout le reste de ce livre, alors prenons le temps de bien la
+lire.}
+
+\begin{extraitcode}{text}
+  accounts.py
+  --- a/accounts.py
+  +++ b/accounts.py
+@@ def transfer(src, dst, amount):
+-     def transfer(src, dst, amount):
+-         src.balance -= amount
+-         dst.balance += amount
++     def transfer(src, dst, amount):
++         if amount <= 0:
++             raise InvalidAmount(amount)
++         src.balance -= amount
++         dst.balance += amount
+\end{extraitcode}
+
+\paragraphe{Que regardes-tu dans un diff ? Trois choses, dans l'ordre. D'abord,
+est-ce que ça fait bien ce qui était demandé — ici, refuser les montants
+invalides ? Oui. Ensuite, est-ce que ça ne fait \important{rien d'autre} en
+douce — un fichier de configuration modifié au passage, une dépendance
+ajoutée ? Non, le changement est chirurgical. Enfin, est-ce cohérent avec le
+projet — l'exception est bien celle du module, l'importation existe déjà ? Oui.}
+
+\paragraphe{Le second diff, celui du test, mérite la même attention. Un agent
+peut écrire un test qui passe pour de mauvaises raisons, par exemple un test
+qui n'exécute jamais l'assertion. Relis-le comme du vrai code :}
+
+\begin{extraitcode}{text}
+  test_accounts.py
++ def test_transfer_montant_negatif_refuse():
++     a, b = Account(100), Account(0)
++     with pytest.raises(InvalidAmount):
++         transfer(a, b, -10)
++
++ def test_transfer_montant_nul_refuse():
++     a, b = Account(100), Account(0)
++     with pytest.raises(InvalidAmount):
++         transfer(a, b, 0)
+\end{extraitcode}
+
+\paragraphe{Là, tu as trois décisions possibles, et une seule à prendre :}
+
+\begin{liste}
+  \element{\important{Accepter} : le diff fait le travail, proprement. Tu
+  approuves, l'agent applique, tu lances les tests pour confirmer.}
+  \element{\important{Corriger} : le fond est bon mais un détail cloche (un nom
+  maladroit, un cas oublié). Tu le dis en une phrase et l'agent ajuste.}
+  \element{\important{Refuser} : la direction est mauvaise. Tu refuses, tu
+  réexpliques l'intention, et l'agent repart sur une autre base.}
+\end{liste}
+
+\begin{avertissement}
+Ne prends jamais l'habitude d'accepter un diff sans le lire parce qu'il « a
+l'air bien » ou que les tests passent. Un test écrit par l'agent et un code
+écrit par l'agent peuvent être faux du même biais et se valider mutuellement.
+La relecture du diff par un humain reste ton dernier rempart. Le jour où tu
+cliques « accepter » par réflexe, tu as troqué ta confiance mesurée contre de
+la confiance aveugle.
+\end{avertissement}
+
+\section{Le cycle court : demander, observer, ajuster}
+
+\paragraphe{Tu viens de vivre une boucle complète : tu as demandé, l'agent a
+exploré et proposé, tu as relu et décidé. C'est le rythme de base du travail
+avec un agent, et il a une vertu : il est \important{court}. Tu n'attends pas
+qu'un gros chantier soit fini pour découvrir qu'il a déraillé dès la troisième
+ligne.}
+
+\paragraphe{Supposons que le diff t'ait presque convenu, mais que tu veuilles
+un message d'erreur plus parlant. Pas besoin de tout reprendre. Tu réponds dans
+la même session, qui a gardé tout son contexte :}
+
+\begin{extraitcode}{text}
+> Bien. Mais InvalidAmount(amount) donne un message obscur en log.
+  Passe-lui un texte explicite, du genre « montant invalide : doit être
+  strictement positif ». Garde le reste tel quel.
+\end{extraitcode}
+
+\paragraphe{L'agent ne recommence pas de zéro : il ajuste le diff existant et te
+le re-présente. Cette conversation incrémentale, c'est tout l'intérêt de rester
+dans une session continue plutôt que de relancer une demande géante à chaque
+correction. Plus tes boucles sont courtes, plus tu gardes la main.}
+
+\begin{astuce}
+Tant que tu apprends à lire un agent, garde tes demandes à la taille d'un seul
+diff relisible d'un coup d'œil. Si une tâche produit un diff trop gros pour être
+relu sans fatigue, c'est le signe qu'il fallait la découper. On en fera une
+compétence à part entière au chapitre suivant.
+\end{astuce}
+
+\section{Débrief : ce qui a marché, ce qui a dérapé}
+
+\paragraphe{Prends l'habitude, après chaque tâche déléguée, d'un court débrief
+mental. Pas de cérémonie : deux questions suffisent. Qu'est-ce que l'agent a
+fait mieux ou plus vite que toi ? Et où a-t-il failli te faire accepter quelque
+chose de bancal ?}
+
+\paragraphe{Sur notre exemple, le bilan est honnête. Au crédit de l'agent : il a
+exploré seul, retrouvé l'exception maison que tu avais oubliée, et produit un
+changement propre accompagné de ses tests. Tu as gagné du temps réel sur une
+corvée réelle.}
+
+\paragraphe{Mais imaginons un dérapage plausible, de ceux qu'on assume dans ce
+livre. Dans une variante de la session, l'agent avait d'abord proposé de
+modifier aussi \code{withdraw()} « pour homogénéiser », alors que personne ne
+le lui avait demandé. Le diff était plus large que la tâche. Inoffensif ?
+Peut-être. Mais c'est exactement le genre de débordement silencieux que la
+relecture attrape : tu as recadré d'une phrase, et le périmètre est redevenu
+celui que tu voulais. Sans relecture, ce surplus serait entré dans ton code
+sans que tu le saches.}
+
+\resumeChapitre{
+  \element{\important{Intention, pas instruction} : formule le but et le critère de réussite, laisse l'agent décider du « comment » après avoir lu le code.}
+  \element{\important{Plan avant le code} : lis toujours le plan annoncé par l'agent avant qu'il agisse — un périmètre inattendu se corrige en une phrase, un diff déjà appliqué se défait bien plus difficilement.}
+  \element{\important{Lire un diff} : vérifie que ça fait ce qui était demandé, qu'il ne modifie rien d'autre en douce, et que c'est cohérent avec le projet.}
+  \element{\important{Boucle courte} : reste dans la même session pour ajuster ; l'agent garde son contexte et affine sans repartir de zéro.}
+  \element{\important{Débrief systématique} : après chaque tâche, note ce que l'agent a bien fait et où il a failli déborder — ce réflexe ancre l'habitude de relecture.}
+}
+
+\paragraphe{Retiens donc de ce premier vol moins le résultat que le réflexe :
+intention claire en entrée, relecture du diff en sortie, boucle courte au
+milieu. C'est ce trépied qui rend la délégation sûre, et tu vas le rejouer à
+chaque chapitre. Reste une question : comment reconnaître, parmi tout ce que tu
+fais dans une journée, ce qui se prête à ce traitement ? Comment penser ton
+travail en morceaux qu'un agent peut réussir ? C'est précisément ce qu'on va
+généraliser au chapitre suivant, en apprenant à penser en tâches que l'on peut
+déléguer.}

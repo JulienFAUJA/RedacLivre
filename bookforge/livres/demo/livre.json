@@ -1,0 +1,25 @@
+{
+  "titre": "BookForge — Démonstration des styles",
+  "langue": "fr",
+  "public_cible": "testeurs du système",
+  "ton": "neutre, démonstratif",
+  "theme_latex": "theme-technique",
+  "intro_livre": "Livre de démonstration exerçant tous les styles BookForge.",
+  "chapitres": [
+    {
+      "id": "01",
+      "slug": "demo",
+      "titre": "Tour d'horizon des styles",
+      "intro": "Antisèche visuelle de tous les éléments de mise en page.",
+      "plan": [
+        "Paragraphes et mises en valeur",
+        "Encadrés sémantiques",
+        "Citations et listes",
+        "Extraits de code"
+      ],
+      "depend_de": [],
+      "statut": "redige"
+    }
+  ],
+  "glossaire_ref": "../../glossaire/termes.json"
+}

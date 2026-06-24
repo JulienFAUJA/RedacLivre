@@ -1,0 +1,61 @@
+%% backmatter/glossaire.tex — Glossaire du livre « Claude Code en pratique »
+%% Commande sémantique : \entreeglossaire{terme}{définition}
+%% définie dans theme-technique.sty
+
+\chapter*{Glossaire}
+\addcontentsline{toc}{chapter}{Glossaire}
+\markboth{Glossaire}{Glossaire}
+
+\entreeglossaire{Agent}{Programme fondé sur un modèle de langage qui agit en
+boucle : il perçoit son environnement (fichiers, commandes, messages), décide
+d'une action, l'exécute, observe le résultat, puis recommence jusqu'à atteindre
+son but.}
+
+\entreeglossaire{Claude Code}{Agent de développement en ligne de commande
+d'Anthropic. Opère directement dans le dépôt : lit le code, propose et applique
+des modifications, lance des commandes, et demande l'approbation du développeur
+selon les règles configurées.}
+
+\entreeglossaire{Contexte}{L'ensemble des informations qu'un agent a
+effectivement sous les yeux à un instant donné : instructions, historique de la
+session, fichiers lus, résultats de commandes. Tout ce qui n'y figure pas
+n'existe pas pour l'agent.}
+
+\entreeglossaire{Fenêtre de contexte}{La quantité maximale d'information qu'un
+agent peut garder active simultanément. Quand elle approche de la saturation,
+l'agent commence à oublier les éléments les plus anciens et ses réponses se
+dégradent.}
+
+\entreeglossaire{Garde-fou}{Règle ou mécanisme qui limite la portée des actions
+d'un agent pour contenir les erreurs et les rendre réversibles. Exemples :
+exiger une confirmation avant toute modification, restreindre les commandes
+autorisées, travailler sur une branche dédiée.}
+
+\entreeglossaire{Hooks}{Scripts shell déclenchés automatiquement par Claude Code
+avant ou après certains événements (soumission d'un message, arrêt de l'agent,
+etc.). Permettent d'automatiser des vérifications ou des actions récurrentes.}
+
+\entreeglossaire{MCP (Model Context Protocol)}{Protocole standardisé qui permet
+à Claude Code de se connecter à des outils et sources de données externes
+(bases de données, APIs, services) via des serveurs MCP dédiés.}
+
+\entreeglossaire{Mémoire projet}{Fichier d'instructions persistantes (typiquement
+\code{CLAUDE.md}) rangé dans le dépôt et chargé automatiquement par l'agent à
+chaque session. Contient les conventions du projet, les commandes de test, les
+pièges connus.}
+
+\entreeglossaire{Orchestration}{Coordination de plusieurs agents ou sous-agents
+travaillant en parallèle sur des tâches complémentaires, pilotée par un agent
+coordinateur.}
+
+\entreeglossaire{Permissions}{Configuration qui détermine quelles actions Claude
+Code peut exécuter sans demander de confirmation (lecture de fichiers, exécution
+de commandes shell, modification de fichiers, etc.).}
+
+\entreeglossaire{Sous-agent (subagent)}{Instance d'agent lancée par un agent
+coordinateur pour traiter une sous-tâche en parallèle. Chaque sous-agent opère
+de façon indépendante dans son propre contexte.}
+
+\entreeglossaire{Token}{Unité de base du traitement par un modèle de langage.
+Correspond approximativement à trois quarts d'un mot en français. La fenêtre de
+contexte et les coûts d'API sont mesurés en tokens.}

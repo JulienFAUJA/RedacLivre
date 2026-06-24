@@ -1,0 +1,203 @@
+%% Chapitre 07 — Garde-fous, permissions et sécurité
+%% RÈGLE : uniquement des commandes sémantiques bookforge.
+
+\chapitre{Garde-fous, permissions et sécurité}
+
+\introChapitre{
+  Un agent qui peut écrire des fichiers et lancer des commandes peut aussi
+  casser des choses. Ce chapitre mêle principes durables et réglages concrets :
+  comment cadrer ce que l'agent a le droit de faire, isoler les opérations
+  risquées, et garder une marche arrière. La confiance se construit sur des
+  garde-fous, pas sur de l'espoir.
+}
+
+\section{Le modèle de permissions : ce qui passe, ce qui demande approbation}
+
+\paragraphe{Au chapitre précédent, tu as appris à relire et tester ce que
+l'agent produit. C'est nécessaire, mais ça intervient \emphase{après} coup.
+Mieux vaut prévenir : cadrer en amont ce que l'agent a le droit de faire. C'est
+le rôle des \terme{garde-fou}s.}
+
+\paragraphe{Le premier d'entre eux est intégré à Claude Code : le modèle de
+\terme{permission}. Chaque action que l'agent veut entreprendre — lire un
+fichier, en modifier un, lancer une commande — passe par une règle qui décide
+de son sort. Trois issues possibles : l'action s'exécute directement, l'action
+te demande une approbation, ou l'action est refusée.}
+
+\paragraphe{Par défaut, le réglage est prudent. Lire un fichier ne coûte rien et
+passe sans bruit. Mais dès que l'agent veut \emphase{écrire} ou exécuter une
+commande shell, il s'arrête et te montre ce qu'il s'apprête à faire : tu vois le
+\code{diff} ou la commande exacte, et tu approuves ou refuses.}
+
+\paragraphe{Ce moment d'approbation est ta principale prise sur l'agent. Ne le
+traite pas comme une formalité à expédier. Lis vraiment la commande proposée
+avant de valider. L'agent qui veut lancer \code{npm test} est inoffensif ;
+celui qui veut \code{rm -rf build/} mérite un coup d'œil attentif.}
+
+\begin{astuce}
+Quand l'agent te propose une action, Claude Code offre souvent une option du
+genre « toujours autoriser ce type de commande ». Pratique, mais réfléchis :
+tu ouvres une porte pour toute la session. Réserve-la aux actions vraiment
+anodines et répétitives, comme lancer les tests.
+\end{astuce}
+
+\section{Commandes dangereuses et opérations destructrices}
+
+\paragraphe{Certaines actions ne se rattrapent pas. Une suppression de fichiers,
+un \code{git reset --hard}, un \code{git push --force}, une commande qui touche
+une base de données ou un service distant : ce sont des opérations
+\important{destructrices}. L'agent ne mesure pas toujours leur portée, parce
+qu'il ne voit qu'une fraction de ton environnement dans son contexte.}
+
+\paragraphe{Le risque n'est pas que l'agent soit malveillant — il ne l'est pas.
+Le risque, c'est qu'il enchaîne une commande plausible mais inadaptée à \emphase{ta}
+situation : effacer un dossier qu'il croit temporaire, écraser une branche qu'il
+pense locale. Une hallucination sur l'état du système suffit.}
+
+\begin{avertissement}
+Ne mets jamais une commande destructrice en autorisation automatique. Les
+\code{rm}, \code{git push --force}, \code{git reset --hard}, \code{DROP TABLE},
+les déploiements et tout ce qui écrit hors du dépôt doivent rester en
+approbation manuelle, sans exception. Le gain de temps d'un clic en moins ne
+vaut pas une perte de données irréversible.
+\end{avertissement}
+
+\paragraphe{La parade durable est simple : tout ce qui est destructeur reste
+sous ton contrôle explicite. Et quand une tâche \emphase{exige} une opération
+risquée, fais-la toi-même plutôt que de la déléguer. L'agent prépare, tu
+appuies sur le bouton rouge.}
+
+\section{Travailler sur une branche : le filet du versionnage}
+
+\paragraphe{Tu connais déjà Git. C'est ton meilleur garde-fou, et il ne coûte
+rien. Avant de lancer l'agent sur une tâche, crée une branche dédiée :}
+
+\begin{extraitcode}{bash}
+git checkout -b agent/refacto-paiement
+# ... tu laisses l'agent travailler sur cette branche ...
+git diff main          # tu compares tout ce qu'il a changé
+git checkout main      # marche arrière instantanée si ça part en vrille
+git branch -D agent/refacto-paiement
+\end{extraitcode}
+
+\paragraphe{Sur une branche, l'agent peut se tromper sans conséquence durable.
+Tout son travail est isolé du code stable. Si le résultat te convient, tu fais
+une revue de \code{diff} puis tu fusionnes. Sinon, tu jettes la branche et il ne
+reste aucune trace. La marche arrière est gratuite et totale.}
+
+\paragraphe{Commite par petits pas pendant la session. Des commits fréquents
+transforment chaque étape en point de sauvegarde : si la troisième modification
+casse tout, tu reviens à la deuxième sans perdre les deux premières. Le
+versionnage fin est un garde-fou plus puissant que n'importe quel réglage de
+permission.}
+
+\begin{astuce}
+N'oublie pas le travail non commité. Avant une session ambitieuse, lance un
+\code{git stash} ou un commit de tes changements en cours. L'agent ne respecte
+pas tes modifications non sauvegardées : il peut les écraser sans le savoir.
+\end{astuce}
+
+\section{Isoler l'agent : répertoires de travail et bacs à sable}
+
+\paragraphe{Le deuxième principe durable, c'est l'isolation : restreindre le
+périmètre physique dans lequel l'agent opère. Claude Code travaille dans le
+répertoire où tu le lances et ses sous-dossiers. Lance-le donc \emphase{depuis
+le dépôt concerné}, jamais depuis ta racine personnelle ou un dossier qui
+contient des projets sans rapport.}
+
+\paragraphe{Plus le périmètre est large, plus une erreur peut faire de dégâts.
+Un agent ouvert sur ton dossier personnel pourrait, sur un malentendu, toucher
+des fichiers qui n'ont rien à voir avec la tâche. Réduis sa surface d'action à
+ce dont il a strictement besoin.}
+
+\paragraphe{Pour les tâches vraiment risquées — du code que tu n'as pas écrit,
+une dépendance douteuse, une expérimentation — pousse l'isolation plus loin :
+fais tourner l'agent dans un conteneur ou une machine jetable. Un bac à sable
+te garantit que même une commande catastrophique reste enfermée et n'atteint ni
+tes autres projets, ni ton système.}
+
+\section{Secrets et données sensibles : ce qu'il ne faut jamais exposer}
+
+\paragraphe{L'agent lit ton dépôt pour se constituer son contexte. S'il y trouve
+des mots de passe, des clés d'API ou des jetons d'accès, ils entrent dans la
+conversation — et donc potentiellement dans des journaux ou un \code{diff} que
+tu partages plus tard.}
+
+\begin{avertissement}
+Ne laisse jamais traîner de secrets en clair dans ton dépôt. Clés d'API,
+identifiants de base de données, jetons : ils vont dans un fichier
+\code{.env} ignoré par Git, jamais dans le code. Ajoute ce fichier à ton
+\code{.gitignore} pour que l'agent — comme Git — ne le versionne pas par
+accident.
+\end{avertissement}
+
+\paragraphe{Tu peux soustraire des chemins entiers à la lecture de l'agent. Un
+fichier d'ignore dédié dit à Claude Code de ne pas ouvrir certains dossiers,
+même s'ils sont versionnés :}
+
+\begin{extraitcode}{text}
+# .claudeignore — fichiers que l'agent n'ouvrira pas
+.env
+.env.*
+secrets/
+**/*.pem
+deploy/credentials.json
+\end{extraitcode}
+
+\paragraphe{Pense aussi aux secrets qui ne sont pas dans le dépôt mais dans ta
+session : ne colle pas une clé de production dans le chat « pour aller plus
+vite ». Et méfie-toi des données réelles d'utilisateurs : pour les tests,
+préfère des jeux de données anonymisés.}
+
+\section{Définir tes propres règles d'autorisation et de refus}
+
+\paragraphe{Les réglages par défaut sont prudents, mais génériques. Tu peux les
+ajuster à ton projet via un fichier de configuration : une liste d'actions
+\emphase{toujours autorisées} (pour fluidifier le quotidien) et une liste
+d'actions \emphase{toujours refusées} (pour fermer définitivement des portes).}
+
+\begin{extraitcode}{json}
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm test)",
+      "Bash(git status)",
+      "Read(src/**)"
+    ],
+    "deny": [
+      "Bash(rm *)",
+      "Bash(git push --force*)",
+      "Read(.env)"
+    ]
+  }
+}
+\end{extraitcode}
+
+\paragraphe{La règle d'or : sois généreux sur l'\emphase{allow} pour les actions
+lisibles et réversibles, strict sur le \emphase{deny} pour tout ce qui est
+destructeur ou sensible. Une bonne liste de refus agit comme une ceinture de
+sécurité : tu ne la sens pas tant que tout va bien, et elle te sauve le jour où
+l'agent dérape.}
+
+\begin{avertissement}
+La syntaxe exacte de ce fichier, son emplacement et le nom des règles évoluent
+au fil des versions de Claude Code. Vérifie la documentation de ta version
+plutôt que de recopier un exemple daté. Le \emphase{principe} — autoriser
+l'anodin, refuser le dangereux — reste valable ; les détails, eux, peuvent
+bouger.
+\end{avertissement}
+
+\resumeChapitre{
+  \element{\important{Permissions} : lis vraiment chaque action proposée avant d'approuver — la demande de confirmation est ta principale prise sur l'agent.}
+  \element{\important{Opérations destructrices} : \code{rm}, \code{git push --force}, \code{DROP TABLE} et tout déploiement restent en approbation manuelle sans exception.}
+  \element{\important{Branche dédiée} : travaille sur une branche avant de lancer l'agent — si ça part en vrille, \code{git checkout main} ramène tout à zéro en une commande.}
+  \element{\important{Isolation} : lance l'agent depuis le dépôt concerné uniquement, jamais depuis ta racine personnelle, pour réduire sa surface d'action au strict nécessaire.}
+  \element{\important{Secrets} : les clés et identifiants vont dans \code{.env} ignoré par Git ; utilise \code{.claudeignore} pour soustraire les fichiers sensibles à la lecture de l'agent.}
+  \element{\important{Règles sur mesure} : liste blanche pour les actions anodines et répétitives, liste noire pour le destructeur et le sensible — la ceinture qui ne se fait sentir que quand ça compte.}
+}
+
+\paragraphe{Tu disposes maintenant d'un jeu de garde-fous complet : permissions,
+branches, isolation, protection des secrets, règles sur mesure. Ces bases
+serviront partout dans la suite — quand tu automatiseras des actions, brancheras
+des outils externes ou affronteras les pièges classiques. Encadrer l'agent,
+c'est ce qui rend la délégation sereine.}

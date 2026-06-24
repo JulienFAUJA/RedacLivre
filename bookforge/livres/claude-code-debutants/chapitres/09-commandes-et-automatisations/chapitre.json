@@ -1,0 +1,16 @@
+{
+  "id": "09",
+  "titre": "Commandes, hooks et automatisations",
+  "intro": "Une fois les bases acquises, on industrialise ses gestes récurrents. Ce chapitre, daté car très lié à l'outillage du moment, présente les slash commands pour réutiliser des prompts, et les hooks pour automatiser des actions autour de l'agent. On transforme des manipulations répétées en raccourcis fiables.",
+  "plan": [
+    "Slash commands : encapsuler un prompt réutilisable",
+    "Créer ta propre commande pour une tâche récurrente",
+    "Hooks : déclencher une action à un moment précis du cycle",
+    "Cas d'usage concrets : formatage, tests, garde-fous automatiques",
+    "Composer commandes et hooks dans un workflow",
+    "Limites et pièges de l'automatisation prématurée"
+  ],
+  "depend_de": ["07"],
+  "longueur_cible": 2200,
+  "statut": "redige"
+}

@@ -1,0 +1,27 @@
+%% ============================================================================
+%%  main.tex — Squelette du livre. Ne contient PAS de contenu : seulement
+%%  l'assemblage. Les agents écrivent dans frontmatter/ et chapitres/.
+%% ============================================================================
+\documentclass[11pt,openright]{book}
+
+%% Les styles sont cherchés dans ../../styles (voir build.ps1 : TEXINPUTS).
+\usepackage[langue=fr]{bookforge}
+\usepackage{code-listings}
+\usepackage{theme-technique}
+
+%% --- Métadonnées du livre (alimentées depuis livre.json par l'orchestrateur)
+\livreTitre{BookForge — Démonstration des styles}
+\livreSousTitre{Vérification de toutes les mises en page}
+\livreAuteur{Système BookForge}
+
+\begin{document}
+
+\frontmatter
+\pageTitre
+\tableMatieres
+\input{frontmatter/intro-livre.tex}
+
+\mainmatter
+\input{chapitres/01-demo/chapitre.tex}
+
+\end{document}

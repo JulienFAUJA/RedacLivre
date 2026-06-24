@@ -1,0 +1,251 @@
+﻿{
+    "titre":  "Claude Code en pratique",
+    "sous_titre":  "Du premier prompt à l\u0027orchestration d\u0027agents — guide concret pour développeurs, édition 2026",
+    "langue":  "fr",
+    "public_cible":  "Développeur qui sait coder mais n\u0027a jamais utilisé d\u0027agent IA de développement. Débutant EN AGENTS, pas en programmation.",
+    "ton":  "Pédagogique, concret, tutoiement, direct, sans bla-bla. Beaucoup d\u0027exemples réels et de cas vécus.",
+    "theme_latex":  "theme-technique",
+    "intro_livre":  "Tu sais coder, mais tu n\u0027as jamais lancé un agent IA dans ton propre dépôt. Ce livre te fait passer de « je n\u0027ai jamais osé déléguer une tâche » à « j\u0027orchestre Claude Code dans mon workflow quotidien avec confiance ». On ne reformule pas la doc : on délègue des tâches réelles, on vérifie le travail de l\u0027agent, on pose des garde-fous, on surveille les coûts, et on apprend à reconnaître les pièges avant qu\u0027ils ne coûtent cher. Les principes durables — comment penser, déléguer et vérifier avec un agent — sont séparés des détails qui changent vite, regroupés dans des chapitres clairement datés et révisables.",
+    "chapitres":  [
+                      {
+                          "id":  "01",
+                          "slug":  "ce-quest-un-agent",
+                          "titre":  "Ce qu\u0027est vraiment un agent de code (et ce qu\u0027il n\u0027est pas)",
+                          "intro":  "Avant de lancer quoi que ce soit, il faut tuer les fausses intuitions. Un agent de code n\u0027est ni une autocomplétion améliorée, ni un oracle. Ce chapitre pose le modèle mental durable qui rend tout le reste compréhensible : boucle perception-action, contexte, outils, et la place du développeur comme donneur d\u0027ordre et vérificateur.",
+                          "plan":  [
+                                       "Du chatbot à l\u0027agent : la différence fondamentale (boucle d\u0027actions, accès aux outils)",
+                                       "Ce qu\u0027un agent voit et ne voit pas : la notion de contexte",
+                                       "Pourquoi un agent se trompe : modèle probabiliste, pas déterministe",
+                                       "Le développeur reste responsable : déléguer n\u0027est pas abdiquer",
+                                       "Tour rapide du paysage 2026 et positionnement de Claude Code",
+                                       "Les trois compétences à acquérir : déléguer, vérifier, encadrer"
+                                   ],
+                          "depend_de":  [
+
+                                        ],
+                          "statut":  "redige"
+                      },
+                      {
+                          "id":  "02",
+                          "slug":  "installation-premier-lancement",
+                          "titre":  "Installation et premier lancement",
+                          "intro":  "On passe à la pratique. Ce chapitre, volontairement daté car les commandes évoluent vite, t\u0027amène d\u0027un terminal vide à une première session Claude Code qui répond dans ton dépôt. On vérifie l\u0027installation, l\u0027authentification, et on lance un tout premier échange anodin pour prendre ses repères.",
+                          "plan":  [
+                                       "Prérequis : terminal, Node, compte Anthropic (état 2026)",
+                                       "Installer Claude Code et vérifier la version",
+                                       "Authentification et configuration minimale",
+                                       "Lancer une première session dans un dépôt jouet",
+                                       "Anatomie de l\u0027interface : prompt, réponses, indicateurs",
+                                       "Quitter proprement et reprendre une session"
+                                   ],
+                          "depend_de":  [
+                                            "01"
+                                        ],
+                          "statut":  "redige"
+                      },
+                      {
+                          "id":  "03",
+                          "slug":  "premiere-tache-reelle",
+                          "titre":  "Ta première tâche réelle déléguée",
+                          "intro":  "Fini les essais à blanc : on confie à l\u0027agent une vraie petite tâche sur du vrai code. L\u0027objectif n\u0027est pas le résultat parfait mais d\u0027observer comment l\u0027agent explore, propose, modifie — et de prendre le réflexe de relire avant d\u0027accepter. C\u0027est ici que naît la confiance mesurée.",
+                          "plan":  [
+                                       "Choisir une bonne première tâche (petite, vérifiable, à faible risque)",
+                                       "Formuler la demande : intention claire plutôt que micro-instructions",
+                                       "Observer l\u0027agent explorer le dépôt et proposer un plan",
+                                       "Lire un diff proposé et décider : accepter, corriger, refuser",
+                                       "Le cycle court : demander, observer, ajuster",
+                                       "Débrief : qu\u0027est-ce qui a bien marché, qu\u0027est-ce qui a dérapé"
+                                   ],
+                          "depend_de":  [
+                                            "02"
+                                        ],
+                          "statut":  "redige"
+                      },
+                      {
+                          "id":  "04",
+                          "slug":  "penser-en-taches-deleguables",
+                          "titre":  "Penser en tâches délégables",
+                          "intro":  "Le vrai levier n\u0027est pas de mieux « prompter » mais de mieux découper. Ce chapitre, central et durable, t\u0027apprend à reformuler ton travail en tâches que l\u0027agent peut réussir : bornées, vérifiables, avec un critère de succès explicite. C\u0027est la compétence qui sépare ceux qui s\u0027agacent de ceux qui gagnent du temps.",
+                          "plan":  [
+                                       "Anatomie d\u0027une tâche délégable : but, contexte, critère de succès",
+                                       "Découper une grosse demande en sous-tâches enchaînables",
+                                       "Tâches à déléguer vs tâches à garder pour soi",
+                                       "Donner le bon contexte sans noyer l\u0027agent",
+                                       "Spécifier le « fini » : comment l\u0027agent sait qu\u0027il a réussi",
+                                       "Anti-patterns de formulation et comment les corriger"
+                                   ],
+                          "depend_de":  [
+                                            "03"
+                                        ],
+                          "statut":  "redige"
+                      },
+                      {
+                          "id":  "05",
+                          "slug":  "gerer-le-contexte",
+                          "titre":  "Gérer le contexte : la ressource qui décide de tout",
+                          "intro":  "Un agent ne raisonne bien que sur ce qu\u0027il a sous les yeux. Trop peu de contexte et il invente ; trop et il se noie ou coûte cher. Ce chapitre durable explique comment l\u0027agent acquiert, retient et perd du contexte, et comment tu peux le piloter activement plutôt que le subir.",
+                          "plan":  [
+                                       "Ce que l\u0027agent garde en mémoire pendant une session",
+                                       "Comment l\u0027agent va chercher du contexte (lecture de fichiers, recherche)",
+                                       "Fenêtre de contexte : limites, saturation, dégradation",
+                                       "Le fichier de mémoire projet : conventions et instructions persistantes",
+                                       "Repartir propre : quand et comment réinitialiser le contexte",
+                                       "Signes qu\u0027il faut recadrer ou redémarrer une session"
+                                   ],
+                          "depend_de":  [
+                                            "04"
+                                        ],
+                          "statut":  "redige"
+                      },
+                      {
+                          "id":  "06",
+                          "slug":  "verifier-le-travail",
+                          "titre":  "Vérifier le travail de l\u0027agent",
+                          "intro":  "Accepter un diff sans le comprendre, c\u0027est signer un chèque en blanc. Ce chapitre durable est le cœur de la promesse du livre : des méthodes concrètes pour relire, tester et challenger ce que produit l\u0027agent, sans devoir tout réécrire à la main. Vérifier vite et bien est ce qui rend la délégation rentable.",
+                          "plan":  [
+                                       "Pourquoi la vérification n\u0027est pas optionnelle",
+                                       "Lire un diff efficacement : ce qu\u0027on regarde en priorité",
+                                       "Faire produire et exécuter des tests pour prouver le travail",
+                                       "Demander à l\u0027agent d\u0027expliquer et de justifier ses choix",
+                                       "Repérer le code plausible mais faux (hallucinations subtiles)",
+                                       "Boucle de correction : renvoyer un retour précis et exploitable"
+                                   ],
+                          "depend_de":  [
+                                            "05"
+                                        ],
+                          "statut":  "redige"
+                      },
+                      {
+                          "id":  "07",
+                          "slug":  "garde-fous-permissions",
+                          "titre":  "Garde-fous, permissions et sécurité",
+                          "intro":  "Un agent qui peut écrire des fichiers et lancer des commandes peut aussi casser des choses. Ce chapitre mêle principes durables et réglages concrets : comment cadrer ce que l\u0027agent a le droit de faire, isoler les opérations risquées, et garder une marche arrière. La confiance se construit sur des garde-fous, pas sur de l\u0027espoir.",
+                          "plan":  [
+                                       "Le modèle de permissions : ce qui demande approbation, ce qui passe",
+                                       "Commandes dangereuses et opérations destructrices à encadrer",
+                                       "Travailler sur une branche : le filet de sécurité du versionnage",
+                                       "Isoler l\u0027agent : répertoires de travail et bacs à sable",
+                                       "Secrets et données sensibles : ce qu\u0027il ne faut jamais exposer",
+                                       "Définir tes propres règles d\u0027autorisation et de refus"
+                                   ],
+                          "depend_de":  [
+                                            "06"
+                                        ],
+                          "statut":  "redige"
+                      },
+                      {
+                          "id":  "08",
+                          "slug":  "cout-et-budget",
+                          "titre":  "Coûts, budget et efficacité",
+                          "intro":  "Déléguer a un prix, en jetons comme en temps. Ce chapitre, en partie daté car les tarifs bougent, t\u0027apprend à comprendre d\u0027où vient la facture, à estimer le coût d\u0027une tâche, et à obtenir plus avec moins. L\u0027efficacité n\u0027est pas radiner : c\u0027est viser le bon niveau d\u0027effort pour chaque tâche.",
+                          "plan":  [
+                                       "D\u0027où vient le coût : jetons d\u0027entrée, de sortie, et contexte rechargé",
+                                       "Estimer le coût d\u0027une tâche avant de la lancer",
+                                       "Les gaspillages classiques et comment les éviter",
+                                       "Choisir le bon niveau d\u0027effort selon l\u0027enjeu de la tâche",
+                                       "Suivre sa consommation et fixer des limites",
+                                       "Quand l\u0027humain coûte moins cher que l\u0027agent (et inversement)"
+                                   ],
+                          "depend_de":  [
+                                            "06"
+                                        ],
+                          "statut":  "redige"
+                      },
+                      {
+                          "id":  "09",
+                          "slug":  "commandes-et-automatisations",
+                          "titre":  "Commandes, hooks et automatisations",
+                          "intro":  "Une fois les bases acquises, on industrialise ses gestes récurrents. Ce chapitre, daté car très lié à l\u0027outillage du moment, présente les slash commands pour réutiliser des prompts, et les hooks pour automatiser des actions autour de l\u0027agent. On transforme des manipulations répétées en raccourcis fiables.",
+                          "plan":  [
+                                       "Slash commands : encapsuler un prompt réutilisable",
+                                       "Créer ta propre commande pour une tâche récurrente",
+                                       "Hooks : déclencher une action à un moment précis du cycle",
+                                       "Cas d\u0027usage concrets : formatage, tests, garde-fous automatiques",
+                                       "Composer commandes et hooks dans un workflow",
+                                       "Limites et pièges de l\u0027automatisation prématurée"
+                                   ],
+                          "depend_de":  [
+                                            "07"
+                                        ],
+                          "statut":  "redige"
+                      },
+                      {
+                          "id":  "10",
+                          "slug":  "connecter-outils-mcp",
+                          "titre":  "Connecter des outils externes avec MCP",
+                          "intro":  "Un agent gagne en puissance quand il peut parler à tes autres outils : base de données, gestionnaire de tickets, documentation. Ce chapitre, daté car l\u0027écosystème évolue, explique le principe du protocole MCP et comment brancher une première intégration utile sans se faire piéger par les questions de confiance.",
+                          "plan":  [
+                                       "Le problème que résout MCP : donner des outils à l\u0027agent",
+                                       "Principe : serveurs MCP, outils exposés, et l\u0027agent qui les appelle",
+                                       "Brancher un premier serveur MCP utile",
+                                       "Choisir des intégrations fiables et limiter les permissions",
+                                       "Cas concrets : tickets, base de données, recherche documentaire",
+                                       "Risques de confiance et bonnes pratiques de cadrage"
+                                   ],
+                          "depend_de":  [
+                                            "07"
+                                        ],
+                          "statut":  "redige"
+                      },
+                      {
+                          "id":  "11",
+                          "slug":  "subagents-et-orchestration",
+                          "titre":  "Subagents et orchestration de tâches",
+                          "intro":  "Pour les gros chantiers, un seul agent dans une seule session ne suffit plus. Ce chapitre durable introduit les subagents et l\u0027idée d\u0027orchestration : déléguer des sous-parties à des agents spécialisés, garder une vue d\u0027ensemble, et faire converger leurs résultats. C\u0027est le saut du « j\u0027utilise un agent » au « je pilote plusieurs agents ».",
+                          "plan":  [
+                                       "Pourquoi un seul agent ne suffit pas pour les gros chantiers",
+                                       "Subagents : déléguer une sous-tâche à un agent dédié",
+                                       "Spécialiser des agents par rôle ou par domaine",
+                                       "Le rôle d\u0027orchestrateur : découper, distribuer, recoller",
+                                       "Travail en parallèle : isolation et points de synchronisation",
+                                       "Cas vécu : un chantier mené avec plusieurs agents"
+                                   ],
+                          "depend_de":  [
+                                            "04",
+                                            "06"
+                                        ],
+                          "statut":  "redige"
+                      },
+                      {
+                          "id":  "12",
+                          "slug":  "pieges-et-cas-vecus",
+                          "titre":  "Pièges, cas vécus et comment s\u0027en sortir",
+                          "intro":  "Ce chapitre rassemble les histoires qui font mal : l\u0027agent qui boucle, qui supprime trop, qui ment avec aplomb, qui part dans le décor. Pour chaque piège, un signal d\u0027alerte, une cause, et une manœuvre de récupération. C\u0027est l\u0027expérience qu\u0027on n\u0027a pas envie d\u0027acquérir au prix fort.",
+                          "plan":  [
+                                       "L\u0027agent qui boucle ou s\u0027enlise : reconnaître et couper",
+                                       "Suppressions et modifications excessives : récupérer la situation",
+                                       "Le code confiant mais faux : pourquoi on se fait avoir",
+                                       "Dérive de contexte : quand l\u0027agent perd le fil",
+                                       "Sur-confiance du développeur : le piège du pilote automatique",
+                                       "Boîte à outils de récupération : annuler, recadrer, repartir"
+                                   ],
+                          "depend_de":  [
+                                            "06",
+                                            "07"
+                                        ],
+                          "statut":  "redige"
+                      },
+                      {
+                          "id":  "13",
+                          "slug":  "workflow-quotidien",
+                          "titre":  "Intégrer Claude Code dans ton workflow quotidien",
+                          "intro":  "Dernier chapitre : on assemble tout en habitudes durables. Comment l\u0027agent prend sa place dans ta journée, ton dépôt et ton équipe, sans devenir une béquille ni un risque. On clôt sur une routine réaliste et sur la manière de continuer à progresser quand l\u0027outil évoluera.",
+                          "plan":  [
+                                       "Une journée type avec un agent : où il aide, où tu gardes la main",
+                                       "Conventions de dépôt et d\u0027équipe pour un usage partagé",
+                                       "Construire ses propres routines de délégation et de vérification",
+                                       "Mesurer si l\u0027agent te fait vraiment gagner",
+                                       "Rester à jour quand l\u0027outil change : principes vs détails",
+                                       "Plan de progression : tes prochaines semaines avec Claude Code"
+                                   ],
+                          "depend_de":  [
+                                            "05",
+                                            "06",
+                                            "07",
+                                            "11"
+                                        ],
+                          "statut":  "redige"
+                      }
+                  ],
+    "glossaire_ref":  "../../glossaire/termes.json"
+}

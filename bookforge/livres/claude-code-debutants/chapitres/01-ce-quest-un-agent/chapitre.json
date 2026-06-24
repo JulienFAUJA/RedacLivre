@@ -1,0 +1,16 @@
+{
+  "id": "01",
+  "titre": "Ce qu'est vraiment un agent de code (et ce qu'il n'est pas)",
+  "intro": "Avant de lancer quoi que ce soit, il faut tuer les fausses intuitions. Un agent de code n'est ni une autocomplétion améliorée, ni un oracle. Ce chapitre pose le modèle mental durable qui rend tout le reste compréhensible : boucle perception-action, contexte, outils, et la place du développeur comme donneur d'ordre et vérificateur.",
+  "plan": [
+    "Du chatbot à l'agent : la différence fondamentale (boucle d'actions, accès aux outils)",
+    "Ce qu'un agent voit et ne voit pas : la notion de contexte",
+    "Pourquoi un agent se trompe : modèle probabiliste, pas déterministe",
+    "Le développeur reste responsable : déléguer n'est pas abdiquer",
+    "Tour rapide du paysage 2026 et positionnement de Claude Code",
+    "Les trois compétences à acquérir : déléguer, vérifier, encadrer"
+  ],
+  "depend_de": [],
+  "longueur_cible": 2200,
+  "statut": "redige"
+}

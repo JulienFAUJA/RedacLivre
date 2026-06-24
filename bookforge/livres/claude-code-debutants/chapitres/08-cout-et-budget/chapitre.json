@@ -1,0 +1,16 @@
+{
+  "id": "08",
+  "titre": "Coûts, budget et efficacité",
+  "intro": "Déléguer a un prix, en jetons comme en temps. Ce chapitre, en partie daté car les tarifs bougent, t'apprend à comprendre d'où vient la facture, à estimer le coût d'une tâche, et à obtenir plus avec moins. L'efficacité n'est pas radiner : c'est viser le bon niveau d'effort pour chaque tâche.",
+  "plan": [
+    "D'où vient le coût : jetons d'entrée, de sortie, et contexte rechargé",
+    "Estimer le coût d'une tâche avant de la lancer",
+    "Les gaspillages classiques et comment les éviter",
+    "Choisir le bon niveau d'effort selon l'enjeu de la tâche",
+    "Suivre sa consommation et fixer des limites",
+    "Quand l'humain coûte moins cher que l'agent (et inversement)"
+  ],
+  "depend_de": ["06"],
+  "longueur_cible": 2000,
+  "statut": "redige"
+}

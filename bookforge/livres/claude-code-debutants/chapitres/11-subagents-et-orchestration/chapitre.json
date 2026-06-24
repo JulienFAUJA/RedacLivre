@@ -1,0 +1,16 @@
+{
+  "id": "11",
+  "titre": "Subagents et orchestration de tâches",
+  "intro": "Pour les gros chantiers, un seul agent dans une seule session ne suffit plus. Ce chapitre durable introduit les subagents et l'idée d'orchestration : déléguer des sous-parties à des agents spécialisés, garder une vue d'ensemble, et faire converger leurs résultats. C'est le saut du « j'utilise un agent » au « je pilote plusieurs agents ».",
+  "plan": [
+    "Pourquoi un seul agent ne suffit pas pour les gros chantiers",
+    "Subagents : déléguer une sous-tâche à un agent dédié",
+    "Spécialiser des agents par rôle ou par domaine",
+    "Le rôle d'orchestrateur : découper, distribuer, recoller",
+    "Travail en parallèle : isolation et points de synchronisation",
+    "Cas vécu : un chantier mené avec plusieurs agents"
+  ],
+  "depend_de": ["04", "06"],
+  "longueur_cible": 2400,
+  "statut": "redige"
+}

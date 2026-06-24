@@ -1,0 +1,169 @@
+%% Chapitre 08 — Coûts, budget et efficacité
+%% RÈGLE : uniquement des commandes sémantiques bookforge. Aucun \chapter,
+%% \textbf, \emph, \begin{lstlisting}, \vspace... brut.
+
+\chapitre{Coûts, budget et efficacité}
+
+\introChapitre{
+  Déléguer a un prix, en jetons comme en temps. Ce chapitre, en partie daté car
+  les tarifs bougent, t'apprend à comprendre d'où vient la facture, à estimer le
+  coût d'une tâche, et à obtenir plus avec moins. L'efficacité n'est pas
+  radiner : c'est viser le bon niveau d'effort pour chaque tâche.
+}
+
+\begin{avertissement}
+Les prix exacts, les noms de modèles et les paliers de facturation changent
+vite. Ce chapitre donne volontairement peu de chiffres : il vise les principes,
+qui eux durent. Avant toute décision budgétaire, vérifie la tarification courante
+sur la page officielle d'Anthropic et dans ton tableau de bord de consommation.
+Ce que tu lis ici t'apprend à raisonner, pas à mémoriser un tarif.
+\end{avertissement}
+
+\section{D'où vient le coût}
+
+\paragraphe{Tu as appris au chapitre précédent à vérifier ce que produit l'agent
+plutôt qu'à lui faire une confiance aveugle. Cette vérification a un coût, et
+l'agent lui-même en a un. Comprendre la facture commence par une unité : le
+\terme{jeton}. Un jeton est un morceau de texte, un mot court vaut à peu près un
+jeton. Tout ce que l'agent lit et écrit se compte ainsi.}
+
+\paragraphe{On facture deux flux séparés. Les \emphase{jetons d'entrée} sont tout
+ce que tu envoies au modèle : ta demande, mais surtout le contexte qui
+l'accompagne, fichiers lus, historique de la session, instructions de la mémoire
+projet. Les \emphase{jetons de sortie} sont ce que l'agent produit : ses
+explications et son code. La sortie coûte en général nettement plus cher par
+jeton que l'entrée.}
+
+\paragraphe{Le piège, c'est l'entrée invisible. À chaque tour de boucle, l'agent
+ne se contente pas de lire ta nouvelle phrase : il relit tout le contexte
+accumulé pour répondre. Une longue session renvoie donc le même historique
+encore et encore. C'est le \emphase{contexte rechargé} : trois échanges anodins
+dans une conversation de cinquante mille jetons coûtent bien plus que les mêmes
+trois échanges dans une session fraîche.}
+
+\begin{note}
+La mise en cache du contexte change la donne sur ce point : relire un bloc déjà
+vu coûte une fraction du plein tarif. Tu n'as rien à activer, mais ça récompense
+un réflexe simple : garder stable le début d'une session plutôt que de remanier
+sans cesse les premières instructions.
+\end{note}
+
+\section{Estimer avant de lancer}
+
+\paragraphe{Avant de lancer une tâche lourde, prends dix secondes pour estimer
+son ordre de grandeur. Pas un chiffre précis : une catégorie. Pose-toi trois
+questions. Combien de fichiers l'agent va-t-il devoir lire pour cette tâche ?
+Combien de code va-t-il produire ? Combien d'allers-retours, donc combien de
+rechargements de contexte, faudra-t-il ?}
+
+\paragraphe{Ces trois réponses te placent dans l'un de trois paniers. Une
+question ciblée sur un fichier est \emphase{légère}. Une refonte qui touche
+plusieurs modules avec relectures et tests est \emphase{lourde}. Le reste est
+\emphase{moyen}. Tu n'as pas besoin de plus de finesse : l'estimation sert à
+décider du cadre, pas à tenir une comptabilité.}
+
+\begin{astuce}
+Avant une grosse tâche, demande un plan d'abord, exécution ensuite : « décris ton
+plan et les fichiers que tu comptes lire, sans rien modifier ». Tu vois le
+périmètre réel pour quelques jetons, et tu corriges le tir avant de payer la
+boucle complète. Un plan à dix mille jetons qui t'évite une exécution à cent
+mille est la meilleure affaire du chapitre.
+\end{astuce}
+
+\section{Les gaspillages classiques}
+
+\paragraphe{La plupart des factures salées ne viennent pas de tâches difficiles,
+mais de gaspillages évitables. Le premier est la \emphase{session-fleuve} : tu
+enchaînes dix sujets sans rapport dans une même conversation, et chaque message
+traîne le contexte de tous les précédents. Démarrer une session neuve par sujet
+coûte presque toujours moins cher.}
+
+\paragraphe{Le deuxième est le \emphase{contexte gavé} : tu colles un fichier
+entier de trois mille lignes quand l'agent n'avait besoin que d'une fonction.
+Vise juste, donne le strict nécessaire. Tu as vu au chapitre sur le contexte que
+trop d'information dégrade aussi la qualité ; ici, elle dégrade en plus le
+portefeuille.}
+
+\paragraphe{Le troisième est la \emphase{boucle qui s'acharne} : l'agent ne
+trouve pas, réessaie, relit, repart, et la facture grimpe sans que le problème
+avance. Quand tu sens ce surplace, coupe. Reformule la tâche, donne l'indice qui
+manque, ou reprends la main. Laisser tourner par paresse est le gaspillage le
+plus sournois.}
+
+\begin{liste}
+  \element{Une session par sujet : on n'empile pas des thèmes sans rapport.}
+  \element{Le strict nécessaire en entrée : un extrait précis vaut mieux qu'un
+  fichier entier.}
+  \element{On coupe une boucle qui patine au lieu de la laisser brûler des jetons.}
+\end{liste}
+
+\section{Le bon niveau d'effort}
+
+\paragraphe{L'efficacité n'est pas de toujours dépenser le moins possible. C'est
+d'aligner l'effort sur l'enjeu. Renommer une variable et refondre une couche
+d'authentification ne méritent ni le même soin ni le même budget. Sous-investir
+sur une tâche critique coûte cher en bugs ; sur-investir sur une broutille
+gaspille sans rien gagner.}
+
+\paragraphe{Deux leviers règlent cet effort. Le premier est le \emphase{choix du
+modèle} : un modèle plus puissant raisonne mieux mais coûte plus par jeton.
+Réserve-le aux tâches où le raisonnement compte vraiment, et confie le travail
+mécanique et répétitif à un modèle plus léger. Le second est l'\emphase{ampleur
+de la consigne} : demander un plan détaillé, des tests et une justification a du
+sens pour un changement risqué, beaucoup moins pour une correction triviale.}
+
+\paragraphe{La règle tient en une phrase : \important{dépense à la hauteur du coût
+d'une erreur.} Là où se tromper se paie cher, mets le paquet, modèle fort,
+vérification serrée. Là où une erreur se corrige en dix secondes, vas-y au plus
+simple et au moins cher.}
+
+\section{Suivre sa consommation}
+
+\paragraphe{On ne pilote bien que ce qu'on mesure. Selon ta formule, ta
+consommation se suit soit dans un tableau de bord d'usage, soit via les
+indicateurs affichés en cours de session. Prends l'habitude d'y jeter un œil :
+non pour culpabiliser, mais pour calibrer ton intuition. Au bout de quelques
+jours, tu sauras d'instinct ce que coûte une tâche moyenne.}
+
+\paragraphe{Fixe-toi ensuite des repères. Sur une formule à l'usage, une limite
+de dépense mensuelle t'évite la mauvaise surprise et te force à prioriser. Sur un
+forfait, c'est ton quota de session qu'il faut apprendre à gérer pour ne pas
+buter sur le plafond au pire moment.}
+
+\begin{avertissement}
+Méfie-toi des tâches lancées et oubliées en arrière-plan. Une boucle qui tourne
+sans surveillance peut consommer beaucoup avant que tu t'en rendes compte. Pose
+un garde-fou : un périmètre borné, une limite, et un coup d'œil régulier. L'agent
+n'a aucune notion de ce qu'il dépense ; cette vigilance, c'est ton rôle.
+\end{avertissement}
+
+\section{Humain ou agent ?}
+
+\paragraphe{Dernière question, la plus saine : cette tâche, l'agent doit-il
+vraiment la faire ? Déléguer n'est rentable que si le temps gagné dépasse le coût
+en jetons plus le temps de vérification. Parfois, le calcul penche pour toi.}
+
+\paragraphe{L'agent gagne quand la tâche est volumineuse mais mécanique : migrer
+cinquante fichiers vers une nouvelle interface, écrire une batterie de tests
+répétitifs, traduire de la documentation. Beaucoup de sortie, peu de jugement, et
+un résultat facile à vérifier en lot : c'est son terrain.}
+
+\paragraphe{Tu gagnes, toi, quand la tâche est minuscule et que tu sais déjà quoi
+faire. Corriger un caractère, ajuster une valeur de configuration, renommer un
+fichier : le temps d'écrire la consigne et de relire le \emphase{diff}, tu
+l'aurais fait deux fois à la main. Le bon réflexe n'est pas « tout déléguer »,
+mais « déléguer ce qui le mérite ».}
+
+\resumeChapitre{
+  \element{\important{Jetons} : tu paies l'entrée (contexte rechargé à chaque tour) et la sortie (code produit) — la sortie est plus chère par jeton, mais l'entrée est le piège invisible des longues sessions.}
+  \element{\important{Estimer avant de lancer} : demande d'abord un plan sans exécution — quelques jetons pour voir le périmètre réel avant de payer la boucle complète.}
+  \element{\important{Trois gaspillages} : la session-fleuve sur des sujets sans rapport, le contexte gavé de fichiers inutiles, et la boucle qui s'acharne sans avancer — coupe-les sans hésiter.}
+  \element{\important{Aligner l'effort sur l'enjeu} : modèle fort et vérification serrée pour les tâches risquées, modèle léger et consigne simple pour les tâches mécaniques.}
+  \element{\important{Mesurer} : suis ta consommation pour calibrer ton intuition ; fixe une limite mensuelle pour prioriser et éviter la mauvaise surprise.}
+}
+
+\paragraphe{Maîtriser le coût, c'est gagner le droit de répéter ses meilleurs
+gestes sans hésiter. Une fois que tu sais ce que vaut une tâche et comment la
+cadrer, l'étape suivante est naturelle : transformer les gestes qui reviennent en
+raccourcis fiables. C'est l'objet du chapitre suivant, où l'on industrialise
+commandes et automatisations.}

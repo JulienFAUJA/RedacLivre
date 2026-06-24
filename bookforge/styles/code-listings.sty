@@ -1,0 +1,108 @@
+%% ============================================================================
+%%  code-listings.sty — Styles d'extraits de code pour BookForge
+%% ----------------------------------------------------------------------------
+%%  Fournit l'environnement sémantique \begin{extraitcode}{langage} ... \end
+%%  et la commande inline \code{...}. Les agents n'utilisent JAMAIS lstlisting
+%%  directement : seulement ces enveloppes. Changer de moteur de coloration
+%%  (listings -> minted) ne touchera donc aucun fichier de contenu.
+%% ============================================================================
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{code-listings}[2026/06/24 v0.1 Extraits de code BookForge]
+
+\RequirePackage{listings}
+\RequirePackage{xcolor}
+\RequirePackage{xparse}
+\RequirePackage{caption}
+
+%% --- Palette (alignée sur theme-technique ; surchargée si le thème est chargé)
+\providecolor{bfcodeBg}{HTML}{F6F8FA}
+\providecolor{bfcodeFrame}{HTML}{D0D7DE}
+\providecolor{bfcodeKw}{HTML}{CF222E}
+\providecolor{bfcodeStr}{HTML}{0A3069}
+\providecolor{bfcodeCom}{HTML}{6E7781}
+\providecolor{bfcodeNum}{HTML}{0550AE}
+
+%% --- Style de base commun ---------------------------------------------------
+\lstdefinestyle{bookforge}{
+  backgroundcolor=\color{bfcodeBg},
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{bfcodeKw}\bfseries,
+  stringstyle=\color{bfcodeStr},
+  commentstyle=\color{bfcodeCom}\itshape,
+  numberstyle=\color{bfcodeNum}\tiny,
+  numbers=left,
+  numbersep=8pt,
+  frame=single,
+  rulecolor=\color{bfcodeFrame},
+  framesep=6pt,
+  breaklines=true,
+  breakatwhitespace=true,
+  showstringspaces=false,
+  tabsize=4,
+  columns=fullflexible,
+  keepspaces=true,
+  upquote=true,
+  extendedchars=true,
+  aboveskip=0.8cm,
+  belowskip=0.8cm,
+  % Accents français dans les extraits de code (listings + utf8).
+  literate=
+    {é}{{\'e}}1 {è}{{\`e}}1 {ê}{{\^e}}1 {ë}{{\"e}}1
+    {à}{{\`a}}1 {â}{{\^a}}1 {ä}{{\"a}}1
+    {î}{{\^i}}1 {ï}{{\"i}}1
+    {ô}{{\^o}}1 {ö}{{\"o}}1
+    {ù}{{\`u}}1 {û}{{\^u}}1 {ü}{{\"u}}1
+    {ç}{{\c c}}1 {É}{{\'E}}1 {È}{{\`E}}1 {À}{{\`A}}1
+    {œ}{{\oe}}1 {æ}{{\ae}}1 {‘}{{'}}1 {’}{{'}}1 {–}{{-}}1 {—}{{-}}1,
+}
+
+%% --- Environnement sémantique : \begin{extraitcode}{langage} ... -----------
+%%  Argument 1 (obligatoire) = langage (python, rust, c, bash, json, text...).
+%%
+%%  Pour ajouter une légende en italique sous le bloc, placer immédiatement
+%%  après \end{extraitcode} la commande : \legendecode{texte de la légende}
+%%
+%%  IMPORTANT : on utilise \lstnewenvironment (et NON \NewDocumentEnvironment),
+%%  car le contenu est lu en mode verbatim par listings.
+\lstnewenvironment{extraitcode}[1]
+  {\lstset{style=bookforge, language=#1}}
+  {}
+
+%% \legendecode{texte} — légende en italique sous un bloc de code.
+%% Placer juste après \end{extraitcode}. L'espacement bas (\baselineskip)
+%% est géré ici ; le belowskip du bloc est donc 0pt (défini dans le style).
+\NewDocumentCommand{\legendecode}{m}{%
+  \par\noindent{\small\itshape #1}\par\vspace{\baselineskip}%
+}
+
+%% --- Code inline ------------------------------------------------------------
+%% Les contenus BookForge placent souvent \code{...} dans l'argument d'une autre
+%% commande semantique (\paragraphe, \element, etc.). Un argument verbatim xparse
+%% (`v`) n'est alors plus relisible et produit le marqueur interne -NoValue- dans
+%% le PDF. On utilise donc un argument normal puis \detokenize pour conserver les
+%% caracteres speciaux courants (_ $ / - . @ ...) en rendu monospace.
+\NewDocumentCommand{\code}{m}{\texttt{\detokenize{#1}}}
+
+%% --- Langages additionnels non connus de `listings` par défaut --------------
+\lstdefinelanguage{json}{
+  basicstyle=\ttfamily\small,
+  showstringspaces=false,
+  morestring=[b]",
+  literate=
+    *{:}{{{\color{bfcodeKw}:}}}{1}
+     {,}{{{\color{bfcodeKw},}}}{1}
+     {\{}{{{\color{bfcodeFrame}\{}}}{1}
+     {\}}{{{\color{bfcodeFrame}\}}}}{1}
+     {[}{{{\color{bfcodeFrame}[}}}{1}
+     {]}{{{\color{bfcodeFrame}]}}}{1},
+}
+
+%% Langage neutre `text` : transcriptions de session, sorties, pseudo-code.
+%% Sans coloration syntaxique, mais bénéficie quand même du style bookforge
+%% (numéros de ligne, cadre) et de la table `literate` des accents.
+\lstdefinelanguage{text}{
+  morekeywords={},
+  sensitive=false,
+}
+
+\endinput

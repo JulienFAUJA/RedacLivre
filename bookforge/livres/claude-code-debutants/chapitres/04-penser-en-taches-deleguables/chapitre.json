@@ -1,0 +1,16 @@
+{
+  "id": "04",
+  "titre": "Penser en tâches délégables",
+  "intro": "Le vrai levier n'est pas de mieux « prompter » mais de mieux découper. Ce chapitre, central et durable, t'apprend à reformuler ton travail en tâches que l'agent peut réussir : bornées, vérifiables, avec un critère de succès explicite. C'est la compétence qui sépare ceux qui s'agacent de ceux qui gagnent du temps.",
+  "plan": [
+    "Anatomie d'une tâche délégable : but, contexte, critère de succès",
+    "Découper une grosse demande en sous-tâches enchaînables",
+    "Tâches à déléguer vs tâches à garder pour soi",
+    "Donner le bon contexte sans noyer l'agent",
+    "Spécifier le « fini » : comment l'agent sait qu'il a réussi",
+    "Anti-patterns de formulation et comment les corriger"
+  ],
+  "depend_de": ["03"],
+  "longueur_cible": 2400,
+  "statut": "redige"
+}

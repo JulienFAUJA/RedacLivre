@@ -1,0 +1,175 @@
+%% ============================================================================
+%%  theme-technique.sty — Thème visuel « technique » pour BookForge
+%% ----------------------------------------------------------------------------
+%%  Définit TOUT le rendu visuel : page de titre, style des chapitres, intros
+%%  de chapitre, encadrés, citations, mises en valeur. Les commandes
+%%  sémantiques de bookforge.sty pointent vers les hooks redéfinis ici.
+%%
+%%  Pour créer un autre look (theme-roman.sty, theme-academique.sty...), il
+%%  suffit de copier ce fichier et de redéfinir les mêmes hooks. Aucun fichier
+%%  de contenu n'a besoin de changer.
+%% ============================================================================
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{theme-technique}[2026/06/24 v0.1 Theme technique BookForge]
+
+\RequirePackage{titlesec}
+\RequirePackage{enumitem}
+\RequirePackage{tcolorbox}
+\tcbuselibrary{skins,breakable}
+\RequirePackage{xcolor}
+\RequirePackage{geometry}
+%% --- Format Amazon KDP 6x9 pouces (broché, sans fond perdu/bleed) -----------
+%% Trim : 6 x 9 in. Marges conformes aux minimums KDP (24-150 pages : intérieure
+%% >= 0.375", extérieure/haut/bas >= 0.25"), avec une marge de confort au-dessus
+%% du minimum pour un rendu professionnel et une tolérance si le livre grossit.
+%%   - inner (reliure) = 0.75"  (min KDP 0.375")
+%%   - outer           = 0.5"   (min KDP 0.25")
+%%   - top / bottom    = 0.75"  (min KDP 0.25")
+%% `twoside` : les marges inner/outer alternent entre pages paires et impaires.
+\geometry{
+  paperwidth=6in, paperheight=9in,
+  inner=0.75in, outer=0.5in,
+  top=0.75in, bottom=0.75in,
+  twoside,
+  headheight=14pt,
+  includehead,            % la marge haute inclut l'en-tête (pas de débordement)
+  heightrounded
+}
+
+%% --- Palette ----------------------------------------------------------------
+\definecolor{bfAccent}{HTML}{0550AE}
+\definecolor{bfAccentSoft}{HTML}{DDE7F5}
+\definecolor{bfGris}{HTML}{6E7781}
+\definecolor{bfNoteBg}{HTML}{EFF6FF}
+\definecolor{bfAstuceBg}{HTML}{ECFDF3}
+\definecolor{bfAvertBg}{HTML}{FFF4E5}
+
+%% --- Polices (compat pdflatex ; remplaçables sous xelatex) ------------------
+\RequirePackage{lmodern}
+
+%% ============================================================================
+%%  PAGE DE TITRE
+%% ============================================================================
+\renewcommand{\bf@rendreTitre}{%
+  \begin{titlepage}\centering
+    \vspace*{3cm}
+    {\color{bfAccent}\rule{\linewidth}{2pt}}\par\vspace{1.5cm}
+    {\Huge\bfseries\color{bfAccent} \bf@titre\par}\vspace{1cm}
+    {\Large\itshape \bf@soustitre\par}\vspace{0.5cm}
+    {\color{bfAccent}\rule{\linewidth}{2pt}}\par\vfill
+    {\large\scshape \bf@auteur\par}\vspace{2cm}
+  \end{titlepage}}
+
+%% ============================================================================
+%%  CHAPITRES (titre numéroté + filet d'accent)
+%% ============================================================================
+\titleformat{\chapter}[display]
+  {\normalfont\huge\bfseries\color{bfAccent}}
+  {\filright\Large\color{bfGris}\chaptertitlename\ \thechapter}
+  {1ex}
+  {\titlerule[1.2pt]\vspace{1ex}\filright}
+  [\vspace{1ex}{\color{bfAccent}\titlerule[1.2pt]}]
+
+\titlespacing*{\chapter}{0pt}{0pt}{2.5em}
+
+%% --- Sections ---------------------------------------------------------------
+\titleformat{\section}
+  {\normalfont\Large\bfseries\color{bfAccent}}{\thesection}{1em}{}
+\titleformat{\subsection}
+  {\normalfont\large\bfseries\color{bfGris}}{\thesubsection}{1em}{}
+
+%% Espacement supplémentaire avant chaque titre de section/sous-section.
+%% Syntaxe titlespacing : {cmd}{left}{before-sep}{after-sep}
+\titlespacing*{\section}{0pt}{2.5ex plus 1ex minus .5ex}{1ex plus .2ex}
+\titlespacing*{\subsection}{0pt}{2ex plus .8ex minus .4ex}{0.8ex plus .1ex}
+
+%% ============================================================================
+%%  INTRO DE CHAPITRE (encadré d'accent en tête de chapitre)
+%% ============================================================================
+\renewcommand{\bf@rendreIntroChap}[1]{%
+  \begin{tcolorbox}[
+    enhanced, breakable,
+    colback=bfAccentSoft, colframe=bfAccent,
+    boxrule=0pt, leftrule=3pt, arc=2pt,
+    left=10pt, right=10pt, top=8pt, bottom=8pt,
+    fontupper=\itshape]
+    #1
+  \end{tcolorbox}\vspace{1em}}
+
+%% ============================================================================
+%%  ENCADRÉS SÉMANTIQUES : note / astuce / avertissement
+%% ============================================================================
+%% Trois commandes distinctes évitent le \if/\fi imbriqué qui déséquilibre les groupes.
+\newcommand{\bf@boiteNote}{%
+  \par\vspace{0.8cm}\noindent%
+  \begin{tcolorbox}[enhanced,colback=bfNoteBg,colframe=bfAccent,
+    title=Note,fonttitle=\bfseries\color{white},arc=2pt,boxrule=.6pt]}
+\newcommand{\bf@boiteAstuce}{%
+  \par\vspace{0.8cm}\noindent%
+  \begin{tcolorbox}[enhanced,colback=bfAstuceBg,colframe=green!45!black,
+    title=Astuce,fonttitle=\bfseries\color{white},arc=2pt,boxrule=.6pt]}
+\newcommand{\bf@boiteAvert}{%
+  \par\vspace{0.8cm}\noindent%
+  \begin{tcolorbox}[enhanced,colback=bfAvertBg,colframe=orange!80!black,
+    title=Avertissement,fonttitle=\bfseries\color{white},arc=2pt,boxrule=.6pt]}
+
+\renewcommand{\bf@ouvrirEncadre}[1]{%
+  \def\bf@enctype{#1}%
+  \ifx\bf@enctype\bf@str@note\bf@boiteNote
+  \else\ifx\bf@enctype\bf@str@astuce\bf@boiteAstuce
+  \else\bf@boiteAvert
+  \fi\fi}
+\renewcommand{\bf@fermerEncadre}{\end{tcolorbox}\vspace{0.8cm}}
+\def\bf@str@note{note}\def\bf@str@astuce{astuce}
+
+%% ============================================================================
+%%  CITATIONS & MISES EN VALEUR
+%% ============================================================================
+\renewcommand{\bf@ouvrirCitation}{%
+  \begin{tcolorbox}[enhanced,breakable,blanker,
+    borderline west={3pt}{0pt}{bfAccent},left=12pt,
+    fontupper=\itshape]}
+\renewcommand{\bf@fermerCitation}{%
+  \ifx\bf@citsrc\empty\else\par\hfill{\normalfont\small\color{bfGris}— \bf@citsrc}\fi
+  \end{tcolorbox}}
+
+\renewcommand{\bf@important}[1]{\textbf{\color{bfAccent}#1}}
+\renewcommand{\bf@emphase}[1]{\textit{#1}}
+\renewcommand{\bf@terme}[1]{\textit{#1}}
+\renewcommand{\bf@etranger}[1]{\textit{#1}}
+
+%% ============================================================================
+%%  RÉSUMÉ DE CHAPITRE
+%% ============================================================================
+\renewcommand{\bf@rendreResume}[1]{%
+  \par\vspace{0.8cm}\noindent
+  \begin{tcolorbox}[enhanced,
+    colback=bfAccentSoft,colframe=bfAccent,
+    title={En résumé},fonttitle=\bfseries\color{white},
+    arc=2pt,boxrule=.6pt,
+    before={\par\bigskip\noindent},after={\par\bigskip}]
+    \begin{itemize}[leftmargin=1.2em,itemsep=2pt,topsep=2pt]
+      #1
+    \end{itemize}
+  \end{tcolorbox}}
+
+%% ============================================================================
+%%  GLOSSAIRE
+%% ============================================================================
+%% \entreeglossaire{terme}{définition} — entrée du glossaire en fin de livre.
+\NewDocumentCommand{\entreeglossaire}{mm}{%
+  \par\bigskip\noindent
+  {\bfseries\color{bfAccent}#1}\quad{\color{bfGris}\rule{1.5cm}{0.4pt}}\par
+  \noindent #2\par}
+
+%% ============================================================================
+%%  EN-TÊTES / PIEDS DE PAGE
+%% ============================================================================
+\RequirePackage{fancyhdr}
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[LE]{\small\nouppercase{\leftmark}}
+\fancyhead[RO]{\small\nouppercase{\rightmark}}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\endinput

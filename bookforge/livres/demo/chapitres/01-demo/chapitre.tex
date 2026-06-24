@@ -1,0 +1,75 @@
+%% Chapitre de démonstration — écrit par un subagent Rédacteur.
+%% RÈGLE : uniquement des commandes sémantiques bookforge. Aucun \chapter,
+%% \textbf, \begin{lstlisting}, \vspace... brut.
+
+\chapitre{Tour d'horizon des styles}
+
+\introChapitre{
+  Ce chapitre montre, côte à côte, tous les éléments de mise en page que tu
+  peux utiliser. Considère-le comme ta antisèche visuelle.
+}
+
+\section{Paragraphes et mises en valeur}
+
+\paragraphe{Voici un paragraphe normal. On peut y insérer un mot
+\important{important}, un \terme{terme technique} défini au glossaire, ou un
+mot \etranger{borrowing} en langue étrangère. Le rendu exact dépend du thème,
+jamais du contenu.}
+
+\paragraphe{Un second paragraphe pour vérifier l'interligne et l'enchaînement
+naturel du texte courant sur plusieurs lignes consécutives au fil de la lecture.}
+
+\section{Encadrés sémantiques}
+
+\begin{note}
+Une note attire l'attention sur un point de contexte utile mais non bloquant.
+\end{note}
+
+\begin{astuce}
+Une astuce propose un raccourci ou une bonne pratique.
+\end{astuce}
+
+\begin{avertissement}
+Un avertissement signale un piège ou une erreur fréquente à éviter.
+\end{avertissement}
+
+\section{Citations et listes}
+
+\begin{bloccitation}[Donald Knuth]
+Les programmes doivent être écrits pour être lus par des humains, et seulement
+incidemment pour être exécutés par des machines.
+\end{bloccitation}
+
+\begin{liste}
+  \element{Premier élément de liste.}
+  \element{Deuxième élément, un peu plus long pour tester le retour à la ligne.}
+  \element{Troisième élément.}
+\end{liste}
+
+\section{Extraits de code}
+
+\paragraphe{Le code inline ressemble à ceci : \code{let x = 42;}. Et un bloc
+complet, ici en Python :}
+
+\begin{extraitcode}{Python}
+def fibonacci(n):
+    """Retourne le n-ième terme de la suite de Fibonacci."""
+    a, b = 0, 1
+    for _ in range(n):
+        a, b = b, a + b
+    return a
+
+print(fibonacci(10))  # 55
+\end{extraitcode}
+
+\paragraphe{Et le même genre de bloc en Rust :}
+
+\begin{extraitcode}{Rust}
+fn main() {
+    let mut somme = 0;
+    for i in 1..=100 {
+        somme += i;
+    }
+    println!("Somme = {}", somme); // 5050
+}
+\end{extraitcode}

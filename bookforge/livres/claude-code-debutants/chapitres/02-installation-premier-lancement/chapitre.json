@@ -1,0 +1,16 @@
+{
+  "id": "02",
+  "titre": "Installation et premier lancement",
+  "intro": "On passe à la pratique. Ce chapitre, volontairement daté car les commandes évoluent vite, t'amène d'un terminal vide à une première session Claude Code qui répond dans ton dépôt. On vérifie l'installation, l'authentification, et on lance un tout premier échange anodin pour prendre ses repères.",
+  "plan": [
+    "Prérequis : terminal, Node, compte Anthropic (état 2026)",
+    "Installer Claude Code et vérifier la version",
+    "Authentification et configuration minimale",
+    "Lancer une première session dans un dépôt jouet",
+    "Anatomie de l'interface : prompt, réponses, indicateurs",
+    "Quitter proprement et reprendre une session"
+  ],
+  "depend_de": ["01"],
+  "longueur_cible": 2000,
+  "statut": "redige"
+}

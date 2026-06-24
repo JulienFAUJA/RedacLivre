@@ -1,0 +1,213 @@
+%% Chapitre 12 — Pièges, cas vécus et comment s'en sortir.
+%% RÈGLE : uniquement des commandes sémantiques bookforge.
+%% Aucun terme du glossaire n'est introduit ici (tous déjà vus aux ch. précédents).
+
+\chapitre{Pièges, cas vécus et comment s'en sortir}
+
+\introChapitre{
+  Ce chapitre rassemble les histoires qui font mal : l'agent qui boucle, qui
+  supprime trop, qui ment avec aplomb, qui part dans le décor. Pour chaque
+  piège, un signal d'alerte, une cause, et une manœuvre de récupération. C'est
+  l'expérience qu'on n'a pas envie d'acquérir au prix fort.
+}
+
+\paragraphe{Tu sais maintenant vérifier le travail de l'agent et poser des
+garde-fous. Reste la partie que personne n'aime raconter : les sessions qui
+dérapent. Bonne nouvelle, les dérapages se répètent. Une poignée de scénarios
+revient sans cesse, et chacun a sa parade. Apprends à les reconnaître tôt,
+quand le coût de la sortie est encore faible.}
+
+\section{L'agent qui boucle ou s'enlise}
+
+\paragraphe{Tu lui demandes de faire passer un test. Il modifie, lance, échoue,
+re-modifie, relance, échoue encore. Trois tentatives, cinq, dix. Chaque essai
+défait à moitié le précédent. La barre d'avancement tourne, le compteur de
+jetons grimpe, et le test reste rouge.}
+
+\begin{avertissement}
+Signal d'alerte : l'agent répète le même geste sur le même fichier sans que le
+résultat change. Si tu vois passer deux fois \emphase{presque} le même diff,
+ou la même erreur reformulée, il ne progresse plus, il s'agite.
+\end{avertissement}
+
+\paragraphe{La cause est presque toujours la même : il lui manque une
+information décisive, et il ne le sait pas. Le test échoue pour une raison qui
+n'est pas dans son contexte (une variable d'environnement absente, une
+dépendance non installée, un comportement attendu qu'il a mal deviné). Plutôt
+que de signaler son ignorance, il tente des variations au hasard. Un agent ne
+dit jamais spontanément « je suis bloqué » : il essaie encore.}
+
+\begin{astuce}
+Manœuvre : coupe, puis change de registre. Interromps la boucle et demande un
+\emphase{diagnostic}, pas une correction : « Ne modifie rien. Explique-moi
+pourquoi ce test échoue et ce qui te manque pour le savoir. » Tu rends visible
+l'information absente, tu la lui fournis, et tu relances. Neuf fois sur dix, la
+correction tient du premier coup.
+\end{astuce}
+
+\paragraphe{Fixe-toi une règle simple : \important{deux échecs identiques, tu
+reprends la main.} Au troisième tour à l'aveugle, l'agent ne raisonne plus, il
+brûle des jetons.}
+
+\section{Suppressions et modifications excessives}
+
+\paragraphe{Tu avais demandé de nettoyer un fichier. Tu relis le diff trop
+vite, tu acceptes. Cinq minutes plus tard, une fonction utilisée ailleurs a
+disparu, des commentaires importants sont partis avec le « bruit », et un bloc
+entier a été « simplifié » jusqu'à changer de comportement.}
+
+\begin{avertissement}
+Signal d'alerte : un diff dont le volume de suppressions dépasse largement ce
+que la tâche justifiait. « Nettoie cet import » qui efface quarante lignes
+mérite un arrêt, pas un clic d'approbation.
+\end{avertissement}
+
+\paragraphe{La cause : l'agent optimise pour la consigne littérale sans
+mesurer les effets de bord. « Nettoyer » est ambigu ; il l'a interprété
+largement. Et un périmètre flou produit toujours des dégâts larges. C'est
+exactement ce que les garde-fous du chapitre précédent servent à contenir.}
+
+\begin{astuce}
+Manœuvre : si tu travailles sur une branche (et tu devrais), la sortie est
+indolore. Tu jettes les changements non commités et tu repars :
+\end{astuce}
+
+\begin{extraitcode}{bash}
+# Annuler tout ce qui n'est pas encore commité, fichiers suivis
+git restore .
+
+# Voir l'ampleur des dégâts AVANT de décider quoi garder
+git diff --stat
+
+# Si un commit est déjà passé, revenir au précédent sans rien perdre
+git reset --soft HEAD~1
+\end{extraitcode}
+
+\paragraphe{La vraie leçon est en amont : commite \important{avant} de lancer
+une tâche large, pas après. Un point de retour propre transforme une
+catastrophe en simple \code{git restore}.}
+
+\section{Le code confiant mais faux}
+
+\paragraphe{C'est le piège le plus sournois, parce qu'il ne ressemble pas à un
+piège. L'agent te livre une fonction nette, bien commentée, qui appelle une
+méthode de bibliothèque au nom parfaitement crédible. Le ton est assuré.
+Le problème : cette méthode n'existe pas. Ou elle existe, mais ne fait pas ce
+qu'il affirme.}
+
+\begin{avertissement}
+Signal d'alerte : une explication \emphase{trop} fluide, sans la moindre
+réserve, sur du code que tu n'as pas exécuté. L'aplomb n'est pas une preuve.
+Une hallucination se présente toujours avec autant d'assurance qu'une vérité.
+\end{avertissement}
+
+\paragraphe{La cause tient à la nature du modèle : il produit ce qui est
+\emphase{plausible}, pas ce qui est \emphase{vérifié}. Une signature
+d'\code{API} inventée est statistiquement vraisemblable, donc elle sort avec la
+même confiance que le reste. L'agent ne ment pas au sens humain ; il comble un
+vide avec ce qui ressemble à la bonne réponse.}
+
+\begin{astuce}
+Manœuvre : ne discute pas, exécute. Le seul antidote fiable, c'est de faire
+tourner le code (ou les tests). Demande à l'agent de lancer lui-même la
+vérification : « Écris un test minimal qui prouve que cette fonction marche, et
+exécute-le. » Tu remplaces une affirmation par une preuve. Si la méthode est
+fantôme, l'erreur d'exécution la démasque immédiatement.
+\end{astuce}
+
+\paragraphe{Méfie-toi en particulier des API récentes, des bibliothèques de
+niche et des versions précises : c'est là que le modèle invente le plus, faute
+d'avoir assez vu ces cas.}
+
+\section{Dérive de contexte}
+
+\paragraphe{La session a commencé sur une migration de base de données. Deux
+heures et trente échanges plus tard, tu lui demandes un détail, et il te répond
+à côté : il a oublié une décision prise au début, il réintroduit un bug que
+vous aviez corrigé ensemble, il confond deux fichiers. L'agent du début n'est
+plus tout à fait là.}
+
+\begin{avertissement}
+Signal d'alerte : l'agent contredit une consigne donnée plus tôt dans la même
+session, ou « redécouvre » un problème déjà résolu. Sa mémoire de la
+conversation s'effrite par le début.
+\end{avertissement}
+
+\paragraphe{La cause : la fenêtre de contexte sature. Quand elle déborde, les
+échanges les plus anciens sont écartés ou compressés, et la qualité se dégrade
+en silence. Une session trop longue, trop touffue, finit toujours par perdre le
+fil de ses propres décisions.}
+
+\begin{astuce}
+Manœuvre : redémarre proprement plutôt que d'insister. Ouvre une nouvelle
+session, et rouvre-la avec un résumé court de l'état : ce qui est fait, ce qui
+reste, les décisions à ne pas rejouer. Mieux encore, consigne les décisions
+durables dans la mémoire projet pour qu'elles survivent à n'importe quelle
+session.
+\end{astuce}
+
+\paragraphe{Préviens la dérive : une session, une mission. Quand la tâche
+change vraiment de nature, repars à neuf plutôt que d'empiler.}
+
+\section{Sur-confiance du développeur}
+
+\paragraphe{Le piège le plus dangereux n'est pas dans l'agent. Il est dans toi.
+Après dix bons diffs d'affilée, tu cesses de lire. Tu cliques « accepter » au
+réflexe. Tu passes en pilote automatique. Et c'est précisément le onzième diff,
+celui qui touche l'authentification, qui contenait l'erreur que tu n'as pas
+vue.}
+
+\begin{avertissement}
+Signal d'alerte : tu approuves plus vite que tu ne lis. Si tu ne pourrais pas
+résumer ce que le dernier diff a changé, tu ne l'as pas relu, tu l'as gobé.
+\end{avertissement}
+
+\paragraphe{La cause est humaine : une série de réussites endort la vigilance.
+Plus l'agent est bon, plus le risque monte, parce que la confiance se
+construit là où elle coûtera le plus cher. La vérification n'est pas un manque
+de confiance envers l'agent ; c'est ta part du travail, et elle ne se délègue
+pas.}
+
+\begin{astuce}
+Manœuvre : module ton attention selon l'enjeu. Un changement de logique métier,
+de sécurité ou de migration de données se relit ligne par ligne, toujours, même
+au cinquantième diff. Le confort de routine se réserve aux zones où une erreur
+se rattrape sans douleur.
+\end{astuce}
+
+\section{Boîte à outils de récupération}
+
+\paragraphe{Quand une session dérape, tu n'as pas besoin de paniquer, tu as
+besoin de réflexes. Voici les gestes qui sortent de presque toutes les
+situations vues dans ce chapitre :}
+
+\begin{liste}
+  \element{\important{Couper.} Interromps l'agent dès que tu vois une boucle ou
+  un dérapage. Chaque tour supplémentaire ne fait qu'aggraver et coûter.}
+  \element{\important{Annuler.} \code{git restore} pour les changements non
+  commités, \code{git reset} pour revenir à un commit propre. Travailler sur
+  une branche rend tout ça réversible.}
+  \element{\important{Recadrer.} Passe de la correction au diagnostic : « ne
+  modifie rien, explique-moi pourquoi ». Tu rends visible l'information qui
+  manquait.}
+  \element{\important{Prouver.} Pour tout code dont tu doutes, exige un test
+  exécuté, pas une explication. Une preuve vaut mille assurances.}
+  \element{\important{Repartir.} Quand le contexte est saturé ou pollué, une
+  session neuve avec un résumé court bat dix relances sur une session fatiguée.}
+\end{liste}
+
+\resumeChapitre{
+  \element{\important{Agent qui boucle} : deux échecs identiques, tu reprends la main — interromps et demande un diagnostic plutôt qu'une correction, pour rendre visible l'information qui manque.}
+  \element{\important{Suppressions excessives} : un diff dont les suppressions dépassent la tâche s'arrête avant approbation ; commite avant de lancer pour que \code{git restore} soit toujours disponible.}
+  \element{\important{Code confiant mais faux} : ne discute pas, exécute — fais tourner un test minimal plutôt que d'accepter une explication fluide.}
+  \element{\important{Dérive de contexte} : quand l'agent contredit une décision prise plus tôt, redémarre avec un résumé court plutôt que d'insister sur une session saturée.}
+  \element{\important{Sur-confiance du développeur} : module ton attention selon l'enjeu — sécurité, logique métier et migrations se relisent ligne par ligne, même au cinquantième diff.}
+}
+
+\paragraphe{Aucun de ces pièges ne disparaîtra : ils sont inhérents à la
+nature de l'agent. Mais chacun se désamorce avec le bon réflexe au bon moment.
+La différence entre une session pénible et une session productive ne tient pas
+à la chance ; elle tient à ces habitudes. \important{C'est justement
+d'habitudes qu'on va parler au dernier chapitre} : comment tisser tout ce que
+tu as appris dans ta journée de travail, pour que ces réflexes deviennent
+naturels plutôt que durement appris.}

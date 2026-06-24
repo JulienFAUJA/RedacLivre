@@ -1,0 +1,16 @@
+{
+  "id": "03",
+  "titre": "Ta première tâche réelle déléguée",
+  "intro": "Fini les essais à blanc : on confie à l'agent une vraie petite tâche sur du vrai code. L'objectif n'est pas le résultat parfait mais d'observer comment l'agent explore, propose, modifie — et de prendre le réflexe de relire avant d'accepter. C'est ici que naît la confiance mesurée.",
+  "plan": [
+    "Choisir une bonne première tâche (petite, vérifiable, à faible risque)",
+    "Formuler la demande : intention claire plutôt que micro-instructions",
+    "Observer l'agent explorer le dépôt et proposer un plan",
+    "Lire un diff proposé et décider : accepter, corriger, refuser",
+    "Le cycle court : demander, observer, ajuster",
+    "Débrief : qu'est-ce qui a bien marché, qu'est-ce qui a dérapé"
+  ],
+  "depend_de": ["02"],
+  "longueur_cible": 2200,
+  "statut": "redige"
+}

@@ -1,0 +1,206 @@
+%% Chapitre 09 — Commandes, hooks et automatisations
+%% RÈGLE : uniquement des commandes sémantiques bookforge. Aucun \chapter,
+%% \textbf, \emph, \begin{lstlisting}, \vspace... brut.
+
+\chapitre{Commandes, hooks et automatisations}
+
+\introChapitre{
+  Une fois les bases acquises, on industrialise ses gestes récurrents. Ce
+  chapitre, daté car très lié à l'outillage du moment, présente les slash
+  commands pour réutiliser des prompts, et les hooks pour automatiser des
+  actions autour de l'agent. On transforme des manipulations répétées en
+  raccourcis fiables.
+}
+
+\paragraphe{Au chapitre précédent, tu as appris à surveiller ce que coûte une
+session et à couper le gaspillage. Le réflexe suivant est naturel : si tu
+retapes le même prompt trois fois par jour, ou si tu relances à la main le
+même formatage après chaque modification, c'est que le geste est mûr pour
+l'automatisation. Ce chapitre outille exactement ça.}
+
+\begin{avertissement}
+Ce chapitre est \emphase{daté}. La syntaxe exacte des commandes, l'emplacement
+des fichiers de configuration et le format des hooks évoluent vite d'une
+version de Claude Code à l'autre. Les exemples ci-dessous illustrent
+les \emphase{concepts}, pas une API figée. Avant de copier un extrait, vérifie
+la documentation de ta version : lance \code{claude --version}, puis confronte
+le format à la doc officielle courante. Si un champ ne fonctionne plus, c'est
+le signe qu'il a changé de nom, pas que l'idée est fausse.
+\end{avertissement}
+
+\section{Slash commands : encapsuler un prompt réutilisable}
+
+\paragraphe{Une \terme{slash command} est une commande personnalisée, invoquée
+par un nom préfixé d'une barre oblique, qui encapsule un prompt réutilisable.
+Au lieu de réécrire à chaque fois « relis ce diff, vérifie la gestion d'erreurs
+et signale les cas limites oubliés », tu enregistres ce prompt une fois sous un
+nom court et tu l'appelles d'un \code{/relecture}.}
+
+\paragraphe{L'intérêt n'est pas le gain de frappe. C'est la
+\emphase{constance}. Un prompt qui traîne dans ta tête varie selon ta fatigue ;
+un prompt figé dans une commande s'applique toujours pareil, avec les mêmes
+exigences. Tu transformes une bonne formulation, trouvée un jour de lucidité,
+en un actif réutilisable par toi et par ton équipe.}
+
+\paragraphe{Concrètement, une slash command est un simple fichier texte rangé
+dans un dossier dédié du projet ou de ta configuration personnelle. Le nom du
+fichier devient le nom de la commande ; son contenu est le prompt. Tout
+l'écosystème repose sur cette idée minimale : du texte versionné dans le dépôt,
+lisible et modifiable comme n'importe quel fichier.}
+
+\section{Créer ta propre commande pour une tâche récurrente}
+
+\paragraphe{Prenons une tâche que tu fais sans cesse : préparer un message de
+commit propre à partir des changements en cours. Tu crées un fichier dans le
+dossier des commandes du projet, par exemple
+\code{.claude/commands/commit.md}, et tu y déposes le prompt.}
+
+\begin{extraitcode}{text}
+Lis le diff des fichiers indexés (git diff --cached).
+Rédige un message de commit en français, format Conventional Commits.
+Première ligne : 72 caractères maximum, à l'impératif.
+Corps : explique le POURQUOI du changement, pas le QUOI.
+N'invente aucun ticket ni numéro. Ne commit pas toi-même : propose seulement.
+\end{extraitcode}
+
+\paragraphe{Désormais, \code{/commit} rejoue ce prompt à l'identique. Tu
+remarques le dernier garde-fou : « ne commit pas toi-même ». Une bonne commande
+borne son propre périmètre. La commande la plus utile est souvent celle qui dit
+aussi à l'agent ce qu'il ne doit \emphase{pas} faire.}
+
+\begin{astuce}
+Versionne tes commandes dans le dépôt, sous \code{.claude/}. Elles deviennent
+alors un bien commun de l'équipe : la même \code{/relecture} s'applique pour
+tout le monde, et une amélioration profite à tous au prochain \code{git pull}.
+Garde-les courtes et mono-tâche ; une commande qui veut tout faire ne fait rien
+de fiable.
+\end{astuce}
+
+\section{Hooks : déclencher une action à un moment précis du cycle}
+
+\paragraphe{Une slash command, c'est toi qui la déclenches. Un \terme{hook},
+lui, se déclenche \emphase{tout seul}, à un moment précis du cycle de l'agent.
+C'est une action automatique attachée à un événement : avant qu'une commande
+shell s'exécute, après qu'un fichier a été modifié, à la fin d'une réponse.
+L'agent n'a rien à décider ; le hook se déclenche, point.}
+
+\paragraphe{La différence est fondamentale. Une commande dépend de ta
+discipline : si tu oublies de l'appeler, rien ne se passe. Un hook ne dépend
+de personne. C'est ce qui en fait un excellent support de garde-fou :
+une règle qui ne s'applique que « quand on y pense » n'est pas une règle.}
+
+\paragraphe{Un hook se configure dans les réglages, en associant un événement à
+une commande shell. Voici l'idée, en pseudo-configuration : à chaque écriture
+de fichier, on lance le formateur.}
+
+\begin{extraitcode}{json}
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "command": "npx prettier --write \"$FICHIER_MODIFIE\""
+      }
+    ]
+  }
+}
+\end{extraitcode}
+
+\paragraphe{Les noms exacts des événements et des variables changent selon les
+versions : c'est précisément le genre de détail que l'avertissement d'ouverture
+te demande de vérifier. Retiens la \emphase{forme}, pas les mots-clés.}
+
+\section{Cas d'usage concrets : formatage, tests, garde-fous}
+
+\paragraphe{Trois familles de hooks couvrent l'essentiel des besoins réels.}
+
+\begin{liste}
+  \element{\important{Formatage automatique.} Après chaque modification de
+  fichier, lancer le formateur du projet (Prettier, Black, gofmt). L'agent ne
+  produit plus jamais de diff mal indenté : le style est garanti par la machine,
+  pas négocié à chaque relecture.}
+  \element{\important{Tests à la volée.} Après modification d'un fichier source,
+  lancer la suite de tests rapides du module touché. Si un test casse, l'agent
+  le voit immédiatement dans le résultat et corrige dans la foulée, au lieu de
+  te livrer du code rouge.}
+  \element{\important{Garde-fou de sécurité.} Avant qu'une commande shell
+  s'exécute, inspecter ce qu'elle contient et bloquer les motifs dangereux
+  (\code{rm -rf}, écriture hors du dépôt, \code{git push --force}). Le hook
+  refuse l'action avant qu'elle ne parte.}
+\end{liste}
+
+\paragraphe{Ce troisième cas relie ce chapitre à ce que tu sais déjà des
+permissions. Une permission décide si une action passe ; un hook de
+blocage, lui, peut inspecter le \emphase{contenu} de l'action et la refuser
+selon une logique fine que tu écris toi-même. Les deux mécanismes se cumulent.}
+
+\begin{extraitcode}{bash}
+#!/usr/bin/env bash
+# Hook pré-exécution : refuse toute suppression récursive forcée.
+if echo "$COMMANDE" | grep -qE 'rm +-[a-z]*r[a-z]*f'; then
+  echo "Suppression récursive bloquée par le garde-fou." >&2
+  exit 1   # un code non nul annule l'action de l'agent
+fi
+\end{extraitcode}
+
+\section{Composer commandes et hooks dans un workflow}
+
+\paragraphe{La vraie puissance vient de la combinaison. Commandes et hooks ne
+sont pas deux gadgets isolés : ce sont les deux moitiés d'un même geste
+industrialisé. La commande porte ton intention ; les hooks garantissent les
+invariants pendant que l'intention s'exécute.}
+
+\paragraphe{Imagine un flux « corriger un bug » de bout en bout. Tu appelles
+ta commande \code{/corrige-bug} qui contient le prompt : reproduire, écrire un
+test qui échoue, corriger, vérifier. Pendant que l'agent travaille, un hook de
+formatage nettoie chaque fichier touché, un hook de test relance la suite après
+chaque écriture, et un hook de sécurité veille sur les commandes shell. Tu as
+décrit l'intention une fois ; les garde-fous tournent en arrière-plan sans que
+tu lèves le petit doigt.}
+
+\paragraphe{Le résultat se relit comme du travail propre : un diff
+correctement formaté, des tests verts, aucune commande risquée passée. Tu n'as
+pas eu à vérifier chacun de ces points à la main, parce que tu les as outillés
+une bonne fois.}
+
+\section{Limites et pièges de l'automatisation prématurée}
+
+\paragraphe{Tout ceci est séduisant, et c'est là le danger. Le piège numéro un
+est l'automatisation \emphase{prématurée} : créer une commande pour un geste
+que tu n'as fait que deux fois, ou empiler des hooks « au cas où ». Chaque
+automatisation est un actif à maintenir. Une commande oubliée qui contient un
+vieux prompt périmé fait pire que pas de commande du tout.}
+
+\paragraphe{La règle pragmatique : automatise un geste seulement quand tu l'as
+répété assez pour en connaître la bonne forme. Avant ça, tu figerais une
+mauvaise version. Laisse le besoin émerger, puis cristallise-le.}
+
+\begin{avertissement}
+Un hook qui échoue silencieusement est pire qu'un bug visible. Si ton hook de
+test plante pour une raison technique (dépendance manquante, chemin cassé),
+l'agent peut interpréter l'erreur de travers et partir corriger un faux
+problème. Fais échouer tes hooks \emphase{bruyamment}, avec un message clair sur
+la sortie d'erreur, et teste-les comme tu testerais n'importe quel script.
+\end{avertissement}
+
+\paragraphe{Deuxième piège : le hook trop lent. Un formateur ou une suite de
+tests lancés après chaque écriture, sur un gros projet, peuvent transformer
+chaque action de l'agent en attente pénible, et faire exploser la facture vue
+au chapitre précédent. Cible tes hooks (un seul module, pas tout le dépôt) et
+mesure leur durée.}
+
+\resumeChapitre{
+  \element{\important{Slash commands} : encapsule un prompt récurrent dans un fichier texte versionné — la constance d'une bonne formulation figée vaut plus que la variabilité d'un prompt réécrit de tête.}
+  \element{\important{Hooks} : attachés à un événement du cycle, ils s'appliquent sans que tu y penses — formatage après chaque modification, tests après chaque écriture, blocage avant une commande risquée.}
+  \element{\important{Composition} : la commande porte l'intention, les hooks garantissent les invariants pendant l'exécution — les deux se cumulent pour un workflow fiable de bout en bout.}
+  \element{\important{Automatiser au bon moment} : fige un geste seulement quand tu l'as répété assez pour en connaître la bonne forme — cristalliser trop tôt fige une mauvaise version.}
+  \element{\important{Hooks bruyants} : un hook qui échoue silencieusement est pire qu'un bug visible — fais-les échouer avec un message clair et teste-les comme du vrai code.}
+}
+
+\paragraphe{Enfin, garde la main. L'automatisation déplace l'effort, elle ne le
+supprime pas : tu ne relis plus l'indentation, mais tu dois relire la logique de
+tes hooks et de tes commandes. C'est du code, avec ses propres bugs. Bien
+outillé, tu as transformé des gestes manuels et faillibles en raccourcis
+fiables. L'étape suivante consiste à ouvrir l'agent sur le monde extérieur :
+au prochain chapitre, on lui branche de vrais outils externes — bases de
+données, gestionnaires de tickets, documentation — grâce au protocole MCP.}

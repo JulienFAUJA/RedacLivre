@@ -1,0 +1,185 @@
+{
+  "description": "Vocabulaire imposé du livre « Claude Code en pratique ». Source de vérité pour la cohérence terminologique entre chapitres et pour la traduction. Rempli par l'Architecte, enrichi par l'Éditeur. La première occurrence indique le chapitre où le terme doit être introduit via \\terme{...}.",
+  "termes": [
+    {
+      "terme": "agent",
+      "definition": "Programme fondé sur un modèle de langage qui, en plus de produire du texte, agit en boucle : il choisit et exécute des actions (lire des fichiers, lancer des commandes, modifier du code) pour atteindre un but, puis observe le résultat avant de continuer. À distinguer d'un simple assistant conversationnel.",
+      "premiere_occurrence": "01",
+      "traductions": {
+        "en": "agent",
+        "es": "agente"
+      },
+      "ne_pas_traduire": false
+    },
+    {
+      "terme": "Claude Code",
+      "definition": "Agent de développement en ligne de commande d'Anthropic, au cœur de ce livre. Il opère directement dans le dépôt du développeur : il lit le code, propose et applique des modifications, lance des commandes, et demande approbation selon les permissions configurées.",
+      "premiere_occurrence": "01",
+      "traductions": {
+        "en": "Claude Code",
+        "es": "Claude Code"
+      },
+      "ne_pas_traduire": true
+    },
+    {
+      "terme": "contexte",
+      "definition": "L'ensemble des informations que l'agent a effectivement sous les yeux à un instant donné : instructions, historique de la session, fichiers lus, résultats de commandes. L'agent ne raisonne que sur son contexte ; ce qu'il ignore, il l'invente ou l'omet.",
+      "premiere_occurrence": "01",
+      "traductions": {
+        "en": "context",
+        "es": "contexto"
+      },
+      "ne_pas_traduire": false
+    },
+    {
+      "terme": "fenêtre de contexte",
+      "definition": "La quantité maximale d'information (mesurée en jetons) que l'agent peut garder active simultanément. Quand elle sature, l'agent oublie les éléments les plus anciens ou voit sa qualité se dégrader.",
+      "premiere_occurrence": "05",
+      "traductions": {
+        "en": "context window",
+        "es": "ventana de contexto"
+      },
+      "ne_pas_traduire": false
+    },
+    {
+      "terme": "jeton",
+      "definition": "Unité élémentaire de texte manipulée et facturée par le modèle (un mot court vaut environ un jeton). Le coût et la taille du contexte se comptent en jetons d'entrée et de sortie.",
+      "premiere_occurrence": "08",
+      "traductions": {
+        "en": "token",
+        "es": "token"
+      },
+      "ne_pas_traduire": false
+    },
+    {
+      "terme": "tâche délégable",
+      "definition": "Travail reformulé pour qu'un agent puisse le réussir : but clair, contexte suffisant, périmètre borné et critère de succès vérifiable. Savoir produire de telles tâches est la compétence centrale du livre.",
+      "premiere_occurrence": "04",
+      "traductions": {
+        "en": "delegable task",
+        "es": "tarea delegable"
+      },
+      "ne_pas_traduire": false
+    },
+    {
+      "terme": "garde-fou",
+      "definition": "Mesure préventive qui limite ce que l'agent peut faire ou répare les dégâts : permission à confirmer, travail sur une branche, répertoire isolé, règle d'autorisation/refus. Les garde-fous transforment la confiance aveugle en confiance outillée.",
+      "premiere_occurrence": "07",
+      "traductions": {
+        "en": "guardrail",
+        "es": "salvaguarda"
+      },
+      "ne_pas_traduire": false
+    },
+    {
+      "terme": "permission",
+      "definition": "Règle qui décide si une action de l'agent (modifier un fichier, lancer une commande) s'exécute directement, demande l'approbation du développeur, ou est refusée.",
+      "premiere_occurrence": "07",
+      "traductions": {
+        "en": "permission",
+        "es": "permiso"
+      },
+      "ne_pas_traduire": false
+    },
+    {
+      "terme": "slash command",
+      "definition": "Commande personnalisée, invoquée par un nom préfixé d'une barre oblique, qui encapsule un prompt réutilisable pour rejouer une tâche récurrente sans la réécrire à chaque fois.",
+      "premiere_occurrence": "09",
+      "traductions": {
+        "en": "slash command",
+        "es": "comando de barra"
+      },
+      "ne_pas_traduire": true
+    },
+    {
+      "terme": "hook",
+      "definition": "Action automatique déclenchée à un moment précis du cycle de l'agent (par exemple avant ou après une modification de fichier), servant à formater, tester ou poser un garde-fou sans intervention manuelle.",
+      "premiere_occurrence": "09",
+      "traductions": {
+        "en": "hook",
+        "es": "hook"
+      },
+      "ne_pas_traduire": true
+    },
+    {
+      "terme": "MCP",
+      "definition": "Model Context Protocol : protocole standard qui permet de connecter l'agent à des outils et sources de données externes (base de données, gestionnaire de tickets, documentation) via des serveurs exposant des outils que l'agent peut appeler.",
+      "premiere_occurrence": "10",
+      "traductions": {
+        "en": "MCP",
+        "es": "MCP"
+      },
+      "ne_pas_traduire": true
+    },
+    {
+      "terme": "serveur MCP",
+      "definition": "Composant qui implémente le protocole MCP pour exposer un ou plusieurs outils à l'agent. On y branche l'agent pour lui donner accès à un système externe précis.",
+      "premiere_occurrence": "10",
+      "traductions": {
+        "en": "MCP server",
+        "es": "servidor MCP"
+      },
+      "ne_pas_traduire": false
+    },
+    {
+      "terme": "subagent",
+      "definition": "Agent secondaire à qui l'agent principal délègue une sous-tâche délimitée, avec son propre contexte. Permet de répartir un gros chantier et de spécialiser le travail par rôle ou par domaine.",
+      "premiere_occurrence": "11",
+      "traductions": {
+        "en": "subagent",
+        "es": "subagente"
+      },
+      "ne_pas_traduire": false
+    },
+    {
+      "terme": "orchestration",
+      "definition": "Coordination de plusieurs agents ou sous-tâches : découper un chantier, distribuer les parties à des subagents, surveiller leur avancement et recoller les résultats en un tout cohérent.",
+      "premiere_occurrence": "11",
+      "traductions": {
+        "en": "orchestration",
+        "es": "orquestación"
+      },
+      "ne_pas_traduire": false
+    },
+    {
+      "terme": "hallucination",
+      "definition": "Production par l'agent d'une affirmation ou d'un code plausible mais faux : fonction inexistante, comportement supposé, raisonnement convaincant mais erroné. Principal danger contre lequel la vérification protège.",
+      "premiere_occurrence": "06",
+      "traductions": {
+        "en": "hallucination",
+        "es": "alucinación"
+      },
+      "ne_pas_traduire": false
+    },
+    {
+      "terme": "diff",
+      "definition": "Représentation des modifications proposées par l'agent, ligne par ligne (ajouts et suppressions). Unité de base que le développeur relit avant d'accepter ou de refuser un changement.",
+      "premiere_occurrence": "03",
+      "traductions": {
+        "en": "diff",
+        "es": "diff"
+      },
+      "ne_pas_traduire": true
+    },
+    {
+      "terme": "session",
+      "definition": "Une conversation continue avec l'agent, dotée de son propre contexte accumulé. Démarrer, reprendre ou réinitialiser une session pilote ce que l'agent se rappelle.",
+      "premiere_occurrence": "02",
+      "traductions": {
+        "en": "session",
+        "es": "sesión"
+      },
+      "ne_pas_traduire": false
+    },
+    {
+      "terme": "mémoire projet",
+      "definition": "Fichier d'instructions persistantes, propre au dépôt, que l'agent charge automatiquement : conventions, contraintes et préférences qui s'appliquent à toutes les sessions sur ce projet.",
+      "premiere_occurrence": "05",
+      "traductions": {
+        "en": "project memory",
+        "es": "memoria del proyecto"
+      },
+      "ne_pas_traduire": false
+    }
+  ]
+}

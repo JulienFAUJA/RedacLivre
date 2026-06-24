@@ -1,0 +1,191 @@
+%% Chapitre 11 — Subagents et orchestration de tâches
+%% RÈGLE : uniquement des commandes sémantiques bookforge. Aucun \chapter,
+%% \textbf, \begin{lstlisting}, \vspace... brut.
+
+\chapitre{Subagents et orchestration de tâches}
+
+\introChapitre{
+  Pour les gros chantiers, un seul agent dans une seule session ne suffit plus.
+  Ce chapitre durable introduit les subagents et l'idée d'orchestration :
+  déléguer des sous-parties à des agents spécialisés, garder une vue d'ensemble,
+  et faire converger leurs résultats. C'est le saut du « j'utilise un agent » au
+  « je pilote plusieurs agents ».
+}
+
+\section{Pourquoi un seul agent ne suffit pas}
+
+\paragraphe{Tu sais maintenant découper un chantier en tâches délégables et
+vérifier ce que l'agent produit. Tant que la tâche tient dans une session,
+ça marche. Mais arrive un moment où elle déborde.}
+
+\paragraphe{Le premier mur est le contexte. Un agent ne raisonne que sur ce
+qu'il a sous les yeux, et sa fenêtre de contexte est finie. Sur un gros
+chantier, à force de lire des fichiers et d'accumuler des résultats de
+commandes, il sature. Les détails du début s'effacent, la qualité chute. Tu
+le vois quand l'agent oublie une décision prise vingt minutes plus tôt.}
+
+\paragraphe{Le deuxième mur est l'attention. Même sans saturer, un agent qui
+jongle entre la migration de la base, le rafraîchissement de l'interface et la
+mise à jour des tests fait tout moyennement. Il mélange les registres, perd le
+fil d'un sujet en traitant l'autre. Comme un humain multitâche, il devient
+médiocre partout.}
+
+\paragraphe{Le troisième mur est le séquentiel. Dix modules indépendants à
+réécrire, un agent les traite l'un après l'autre. Tu attends. Pourtant, rien
+n'oblige à ce que ces dix chantiers se suivent : ils pourraient avancer de
+front.}
+
+\paragraphe{La réponse à ces trois murs est la même : \important{ne plus
+mettre un seul agent sur tout}. On répartit. C'est exactement le geste que tu
+fais déjà entre humains quand un projet dépasse une personne.}
+
+\section{Subagents : déléguer une sous-tâche à un agent dédié}
+
+\paragraphe{Un \terme{subagent} est un agent secondaire à qui l'agent
+principal confie une sous-tâche délimitée, avec son \emphase{propre} contexte.
+C'est le point clé : le subagent démarre frais, ne voit que ce qu'on lui donne,
+travaille dans son coin, et renvoie un résultat.}
+
+\paragraphe{Cette isolation du contexte est un atout, pas une contrainte.
+Le subagent qui analyse la couverture de tests n'encombre pas la session
+principale avec les centaines de lignes qu'il a lues : il remonte une synthèse.
+L'agent principal récupère la conclusion, pas le fouillis. Sa propre fenêtre
+de contexte reste légère et nette.}
+
+\paragraphe{Le revers : le subagent ne sait que ce que tu lui transmets dans
+son prompt de lancement. Il n'a pas vécu la conversation. Une sous-tâche mal
+cadrée — but flou, contexte manquant, critère de succès absent — échoue plus
+durement encore qu'avec un agent ordinaire, parce qu'il n'y a personne pour
+rattraper en cours de route. La règle de la tâche délégable du chapitre~04
+s'applique ici à la lettre.}
+
+\begin{astuce}
+Délègue à un subagent ce qui est \emphase{borné} et dont seul le résultat
+compte : « audite l'usage de cette API dépréciée et liste les fichiers à
+changer », « écris les tests de ce module ». Garde dans la session principale
+ce qui demande le fil de la conversation et tes arbitrages.
+\end{astuce}
+
+\section{Spécialiser des agents par rôle ou par domaine}
+
+\paragraphe{Le contexte d'un subagent ne contient pas que la tâche : il
+contient aussi un \emphase{rôle}. Tu peux préfixer son prompt par une posture —
+« tu es un relecteur de sécurité », « tu es un rédacteur de documentation » —
+et lui donner des consignes propres à ce rôle. Le même modèle, cadré
+différemment, produit un travail différent.}
+
+\paragraphe{Deux axes de spécialisation reviennent. Par \important{rôle} :
+un agent qui écrit, un autre qui relit, un troisième qui teste. Le relecteur
+n'a pas le biais de l'auteur ; il attaque le code avec un regard neuf, ce qui
+le rend bien plus efficace pour traquer une hallucination glissée dans la
+première passe.}
+
+\paragraphe{Par \important{domaine} : un agent pour le \etranger{back-end},
+un pour le \etranger{front-end}, un pour les migrations de données. Chacun
+reçoit en contexte les conventions et les fichiers de son périmètre, et rien
+d'autre. Plus le périmètre est étroit, plus le contexte est pertinent, et
+meilleur est le résultat.}
+
+\paragraphe{Quand tu retrouves toujours les mêmes rôles, fige-les. Un rôle de
+subagent réutilisable n'est rien d'autre qu'un prompt soigné — la même logique
+qu'une slash command, mais pour une posture entière plutôt qu'une commande.
+Tu l'écris une fois, tu le rejoues partout.}
+
+\section{Le rôle d'orchestrateur : découper, distribuer, recoller}
+
+\paragraphe{Dès qu'il y a plusieurs subagents, il faut quelqu'un au-dessus
+pour les coordonner. C'est l'\terme{orchestration}, et l'agent qui s'en charge
+est l'orchestrateur. Son travail tient en trois temps.}
+
+\paragraphe{\important{Découper.} L'orchestrateur transforme le chantier en
+sous-tâches autonomes. La qualité du découpage décide de tout : des morceaux
+qui se chevauchent produiront des conflits ; des morceaux qui dépendent les uns
+des autres ne pourront pas avancer en parallèle. Le bon découpage minimise les
+liens entre les parties.}
+
+\paragraphe{\important{Distribuer.} Il lance chaque subagent avec un prompt
+autoporteur — but, contexte, périmètre, critère de succès — et le bon rôle.
+L'orchestrateur ne fait pas le travail : il le confie et le suit.}
+
+\paragraphe{\important{Recoller.} C'est l'étape qu'on sous-estime. Chaque
+subagent renvoie un fragment ; il faut les assembler en un tout cohérent,
+détecter les contradictions, combler les trous. Le recollage est aussi le
+moment de la vérification : l'orchestrateur relit les diffs remontés avant de
+les intégrer, exactement comme tu relis ceux d'un agent unique.}
+
+\begin{avertissement}
+L'orchestrateur hérite des défauts qu'il coordonne. Si un subagent hallucine
+et que personne ne relit le fragment qu'il remonte, l'erreur entre dans
+l'assemblage final, noyée parmi les autres. Plus il y a d'agents, plus la
+vérification au recollage est indispensable, pas optionnelle.
+\end{avertissement}
+
+\section{Travail en parallèle : isolation et synchronisation}
+
+\paragraphe{Le parallélisme est le gain le plus visible : dix subagents qui
+travaillent en même temps finissent en une fraction du temps d'un agent seul.
+Mais le parallélisme n'est sûr qu'à une condition : l'\important{isolation}.
+Deux agents qui modifient le même fichier en même temps se marchent dessus.}
+
+\paragraphe{La parade est de donner à chacun un terrain à lui. En pratique :
+un dossier distinct, une copie de travail séparée, une branche dédiée — bref,
+un garde-fou d'isolation au sens du chapitre~07, mais multiplié. Si les
+périmètres ne se recouvrent pas, le parallélisme ne provoque aucun conflit,
+par construction.}
+
+\paragraphe{Reste la \important{synchronisation} : les points où les fils
+parallèles doivent se rejoindre. Tu ne peux pas assembler tant que tous les
+subagents n'ont pas fini ; tu ne peux pas tester l'ensemble avant l'assemblage.
+Ces points d'attente sont normaux. L'art de l'orchestration consiste à en
+avoir le moins possible — c'est-à-dire à découper de sorte que les parties
+restent indépendantes le plus longtemps.}
+
+\paragraphe{Et quand une dépendance est inévitable, on l'assume : telle partie
+attend telle autre. Vouloir tout paralléliser à n'importe quel prix recrée les
+conflits qu'on cherchait à fuir.}
+
+\section{Cas vécu : un chantier mené avec plusieurs agents}
+
+\paragraphe{Prenons un cas concret et méta : produire un livre technique d'une
+quinzaine de chapitres avec des agents. Un seul agent aurait saturé son
+contexte bien avant le tiers, et chaque chapitre aurait pâti de ce qui le
+précédait dans la session.}
+
+\paragraphe{Le découpage tombe sous le sens : un chapitre est une sous-tâche
+quasi autonome. L'orchestrateur prépare donc un contrat partagé — ton,
+vocabulaire imposé, conventions — puis lance \emphase{un subagent rédacteur
+par chapitre}, en parallèle. Chaque subagent reçoit le plan de \emphase{son}
+chapitre, le contrat commun, et écrit \emphase{uniquement} dans son dossier.}
+
+\paragraphe{L'isolation est totale : un dossier par chapitre, donc aucun
+conflit d'écriture, même avec quinze agents simultanés. Les subagents ne se
+parlent pas — et n'ont pas à le faire. Leur cohérence ne vient pas d'une
+communication, mais du contrat partagé que chacun a reçu en entier. C'est ce
+qui remplace la conversation commune qu'ils n'ont jamais eue.}
+
+\paragraphe{Le point de synchronisation arrive à la fin : quand tous les
+chapitres sont rédigés, l'orchestrateur recolle. Il vérifie qu'aucun terme
+n'est défini deux fois, que les transitions entre chapitres voisins
+s'enchaînent, qu'un chapitre ne contredit pas le suivant. Là où le contrat
+n'a pas suffi, il corrige.}
+
+\paragraphe{Le bilan est instructif. Le parallélisme a divisé le temps total
+par un grand facteur. La spécialisation a donné des chapitres mieux ciblés
+qu'un agent fatigué n'en aurait écrit. Mais le travail de l'orchestrateur — le
+contrat en amont, le recollage en aval — a pesé plus lourd que prévu. C'est la
+leçon générale : \important{orchestrer ne supprime pas le travail, il le
+déplace} vers le découpage et l'assemblage.}
+
+\resumeChapitre{
+  \element{\important{Subagent} : un agent secondaire avec son propre contexte vierge, à qui on confie une sous-tâche délimitée — il remonte un résultat, pas un fouillis.}
+  \element{\important{Prompt autoporteur} : le subagent n'a pas vécu la conversation principale ; son brief doit contenir but, contexte, périmètre et critère de succès sans rien supposer.}
+  \element{\important{Orchestrateur} : découpe le chantier, distribue les sous-tâches, puis recolle les fragments en vérifiant chaque diff remontés avant intégration.}
+  \element{\important{Isolation pour le parallélisme} : donne à chaque subagent un terrain à lui (dossier, branche) — deux agents sur le même fichier se marchent dessus.}
+  \element{\important{Orchestrer déplace le travail} : le gain en parallélisme se paie en travail de découpage en amont et de recollage en aval — anticipe-le, ne le sous-estime pas.}
+}
+
+\paragraphe{Tu sais désormais piloter plusieurs agents : les spécialiser,
+les lancer en parallèle, les isoler, recoller leurs résultats. C'est puissant,
+et c'est précisément quand on tient un outil puissant qu'on se blesse. Le
+chapitre suivant rassemble les pièges et les cas vécus — les ratés assumés —
+pour que les tiens coûtent moins cher.}

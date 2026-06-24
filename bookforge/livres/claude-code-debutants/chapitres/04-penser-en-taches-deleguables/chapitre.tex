@@ -1,0 +1,270 @@
+%% Chapitre 04 — Penser en tâches délégables
+%% RÈGLE : uniquement des commandes sémantiques bookforge. Aucun \chapter,
+%% \textbf, \begin{lstlisting}, \vspace... brut.
+
+\chapitre{Penser en tâches délégables}
+
+\introChapitre{
+  Le vrai levier n'est pas de mieux « prompter » mais de mieux découper. Ce
+  chapitre, central et durable, t'apprend à reformuler ton travail en tâches que
+  l'agent peut réussir : bornées, vérifiables, avec un critère de succès
+  explicite. C'est la compétence qui sépare ceux qui s'agacent de ceux qui
+  gagnent du temps.
+}
+
+\section{Anatomie d'une tâche délégable}
+
+\paragraphe{Au chapitre précédent, tu as confié une vraie tâche à l'agent et tu
+l'as vu explorer, proposer, modifier. Tu as réussi un coup. La question
+maintenant : comment transformer ce coup unique en réflexe, pour toutes tes
+tâches ? La réponse tient dans un changement de regard. Tu arrêtes de penser
+« comment lui parler » et tu commences à penser « est-ce que ce travail est
+formulé pour qu'il puisse le réussir ».}
+
+\paragraphe{C'est exactement ce qu'on appelle une \terme{tâche délégable} : un
+travail reformulé pour qu'un agent puisse l'accomplir. Pas n'importe quel
+travail jeté par-dessus l'épaule, mais un travail qui réunit quatre ingrédients.
+Un \important{but} clair : ce qu'on veut obtenir, pas la manière. Un
+\important{contexte} suffisant : ce que l'agent doit savoir et où regarder. Un
+\important{périmètre} borné : ce qui est inclus et, surtout, ce qui ne l'est pas.
+Et un \important{critère de succès} vérifiable : un test objectif qui dit « c'est
+fini » sans dépendre de ton avis du moment.}
+
+\paragraphe{Retiens ces quatre mots, ils structurent tout le chapitre : but,
+contexte, périmètre, critère. Une demande à laquelle il manque un de ces quatre
+n'est pas mauvaise, elle est simplement \important{incomplète} — et l'agent
+comblera le trou en devinant, parfois bien, souvent à côté.}
+
+\paragraphe{Prends un exemple minimal. Une mauvaise formulation : « améliore la
+fonction de connexion ». Aucun des quatre ingrédients n'y est. Améliorer dans
+quel sens ? Quelle fonction, dans quel fichier ? Jusqu'où va-t-on ? Et comment
+saura-t-on que c'est mieux ? Compare avec une version délégable :}
+
+\begin{extraitcode}{text}
+But       : la fonction loginUser doit rejeter les mots de passe
+            de moins de 8 caractères.
+Contexte  : la fonction est dans src/auth/login.js ; la validation
+            actuelle ne vérifie que le format de l'email.
+Périmètre : ne touche qu'à loginUser ; ne change pas la signature
+            ni les autres validations.
+Succès    : un nouveau test rejette "abc" et accepte "motdepasse1".
+\end{extraitcode}
+
+\paragraphe{Même demande sur le fond, mais l'une se résout en une boucle, l'autre
+en une devinette. Tu n'as pas besoin de réciter ces quatre lignes à chaque fois —
+avec l'habitude elles tiennent dans une phrase. Ce qu'il te faut, c'est l'instinct
+de vérifier qu'aucune ne manque avant d'appuyer sur Entrée.}
+
+\begin{astuce}
+Quand une de tes consignes se passe d'instructions sur la \emphase{manière}, c'est
+bon signe : tu décris un résultat, pas une recette. Laisse à l'agent le « comment »
+tant que tu tiens fermement le « quoi » et le « comment vérifier ».
+\end{astuce}
+
+\section{Découper une grosse demande en sous-tâches enchaînables}
+
+\paragraphe{La plupart des échecs ne viennent pas d'une mauvaise formulation mais
+d'une tâche trop grosse. « Ajoute l'authentification à mon application » n'est pas
+une tâche, c'est un projet : schéma de base de données, routes, validation,
+gestion de session, pages, tests. Donné d'un bloc, l'agent va soit s'éparpiller,
+soit prendre dix décisions à ta place que tu découvriras trop tard dans un
+\terme{diff} géant impossible à relire.}
+
+\paragraphe{Le réflexe : découper en sous-tâches qui s'enchaînent, chacune
+délégable au sens de la section précédente. Une bonne sous-tâche produit un
+résultat \important{vérifiable seul}, avant de passer à la suivante. Tu ne lances
+pas la deuxième tant que la première n'est pas verte.}
+
+\begin{extraitcode}{text}
+1. Crée la table `users` (email, password_hash, created_at)
+   + la migration. Succès : la migration s'applique sans erreur.
+2. Ajoute la route POST /signup qui valide l'email et hache
+   le mot de passe. Succès : un test crée un user et renvoie 201.
+3. Ajoute la route POST /login qui vérifie les identifiants.
+   Succès : un test accepte le bon couple, rejette le mauvais.
+4. Branche la session sur /login. Succès : un test montre
+   un cookie de session posé après connexion.
+\end{extraitcode}
+
+\paragraphe{Chaque étape s'appuie sur la précédente, et chacune a son propre
+critère de succès. Si l'étape 3 part de travers, tu le vois sur l'étape 3 — tu
+ne remontes pas une avalanche. C'est la différence entre déboguer un changement
+de cinquante lignes et déboguer un changement de huit cents.}
+
+\paragraphe{Tu peux confier le découpage lui-même à l'agent : « voici ce que je
+veux au final, propose-moi un découpage en étapes vérifiables une par une, ne
+code rien encore ». Tu obtiens un plan que tu relis et corriges avant qu'une
+seule ligne soit écrite. Valider le plan coûte une minute ; relire le mauvais
+code en coûte trente.}
+
+\begin{avertissement}
+Une grosse demande qui « marche du premier coup » est souvent un piège : l'agent
+a comblé les trous avec des hypothèses que tu n'as pas vues passer. Ça compile,
+donc tu fais confiance — jusqu'à ce qu'un choix implicite te saute au visage en
+production. Découper, c'est rendre ces choix visibles un par un.
+\end{avertissement}
+
+\section{Tâches à déléguer, tâches à garder pour soi}
+
+\paragraphe{Tout n'est pas à déléguer, et croire le contraire est le meilleur
+moyen de perdre confiance dans l'agent. Le bon partage ne dépend pas de la
+difficulté technique mais de deux questions : \important{le critère de succès
+est-il objectif}, et \important{le coût d'une erreur est-il récupérable} ?}
+
+\paragraphe{Délègue volontiers ce qui est borné et vérifiable : écrire des tests
+à partir d'une spec, renommer un symbole partout, traduire un module d'une API à
+une autre, rédiger une première version de documentation, repérer où un
+comportement est implémenté dans une base que tu connais mal. Ce sont des tâches
+où « réussi » se constate, pas se discute.}
+
+\paragraphe{Garde pour toi, ou ne délègue qu'après cadrage serré, ce qui repose
+sur un jugement que toi seul détiens : choisir une architecture qui engage le
+projet pour des mois, arbitrer un compromis produit, décider d'une stratégie de
+migration risquée, trancher sur des données sensibles. Là, le critère de succès
+est ton jugement — il n'est pas externalisable. Tu peux faire \emphase{explorer} les
+options par l'agent, mais la décision reste à toi.}
+
+\begin{liste}
+  \element{Critère objectif + erreur récupérable → délègue sans hésiter.}
+  \element{Critère objectif + erreur coûteuse → délègue, mais avec un périmètre
+  étroit et une relecture serrée du \terme{diff}.}
+  \element{Critère subjectif → garde la décision ; ne délègue au mieux que
+  l'exploration des options.}
+\end{liste}
+
+\paragraphe{Avec le temps, ce tri devient automatique. Tu sens en lisant ta
+propre demande si elle a un critère de succès que tu pourrais coder en test —
+ou si elle te demande, à toi, de regarder le résultat et de juger « oui, c'est
+bien comme ça ». Le premier cas se délègue ; le second se supervise.}
+
+\section{Donner le bon contexte sans noyer l'agent}
+
+\paragraphe{Un agent ne raisonne que sur son \terme{contexte} : ce qu'il a sous
+les yeux, il l'utilise ; ce qu'il ignore, il l'invente. La tentation du débutant
+est alors de tout donner — coller cinq fichiers, l'historique complet, le ticket,
+la doc. Mauvais réflexe. Trop de contexte dilue les informations qui comptent et
+fait dériver l'agent vers des détails sans rapport.}
+
+\paragraphe{Le bon contexte est \important{ciblé}, pas \important{exhaustif}. La
+question utile n'est pas « qu'est-ce que je pourrais lui donner ? » mais « de
+quoi a-t-il strictement besoin pour réussir \emphase{cette} tâche ? ». Souvent, la
+meilleure réponse n'est pas un fichier collé mais une indication d'où regarder :
+l'agent ira lire lui-même ce qui lui manque, plus à jour que ton copier-coller.}
+
+\paragraphe{Compare. Une formulation qui noie : « voici tout le dossier \texttt{src}, le README, et le ticket JIRA, débrouille-toi pour corriger le bug de date ». Une formulation qui cible : « le bug d'affichage des dates est dans \code{src/utils/format.js}, fonction \code{formatDate} ; les dates en UTC s'affichent avec un jour de retard ; regarde comment elle gère les fuseaux ». La seconde tient en une ligne et pointe l'agent droit sur la zone.}
+
+\begin{astuce}
+Préfère « regarde dans \code{tel fichier} » à « voici le contenu de \code{tel fichier} ». Donner un chemin laisse l'agent lire la version réelle et courante ;
+coller du texte fige une copie qui peut déjà être périmée et qui occupe de la
+place pour rien.
+\end{astuce}
+
+\paragraphe{Le contexte qui compte vraiment, c'est l'\important{implicite} : les
+conventions, les contraintes, les pièges que tu as en tête et que l'agent ne peut
+pas deviner. « On utilise toujours des dates en UTC en base », « ne touche jamais
+au dossier \code{legacy/} », « les tests tournent avec \code{npm test} ». Cet
+implicite-là vaut dix fichiers collés. C'est lui qu'il faut rendre explicite —
+et c'est précisément ce que la suite du livre apprend à automatiser, pour ne pas
+le répéter à chaque \terme{session}.}
+
+\section{Spécifier le « fini » : comment l'agent sait qu'il a réussi}
+
+\paragraphe{De tous les ingrédients, le critère de succès est celui qu'on oublie
+le plus et celui qui rapporte le plus. Sans lui, l'agent s'arrête quand
+\emphase{lui} estime avoir fini — c'est-à-dire au premier point qui lui semble
+plausible. Avec lui, il a une cible objective : il peut vérifier son propre
+travail, et toi aussi.}
+
+\paragraphe{Le meilleur critère est \important{exécutable} : un test qui passe,
+une commande qui sort sans erreur, une sortie attendue précise. « La fonction
+marche » n'est pas un critère ; « \code{npm test} passe et le nouveau test
+\code{rejette les emails sans @} est vert » en est un. Le premier dépend de
+l'humeur, le second se constate.}
+
+\begin{extraitcode}{text}
+Flou   : « assure-toi que le parsing est robuste »
+Net    : « parseConfig doit renvoyer une erreur explicite sur un
+          JSON invalide ; ajoute un test qui le vérifie sur "{" »
+
+Flou   : « rends la page plus rapide »
+Net    : « le rendu initial ne doit plus déclencher qu'une seule
+          requête réseau ; vérifie-le dans l'onglet réseau »
+
+Flou   : « nettoie ce module »
+Net    : « supprime les fonctions non utilisées de utils.js ;
+          le lint et les tests doivent rester verts »
+\end{extraitcode}
+
+\paragraphe{Une astuce qui change tout : demande à l'agent de \important{prouver}
+qu'il a réussi, pas seulement de l'affirmer. « Montre-moi le test qui le
+démontre » ou « lance la commande et colle la sortie ». Tu passes de la confiance
+sur parole à la preuve. Et quand un critère exécutable n'existe pas — un libellé
+d'interface, un ton de message — rends-le concret autrement : un exemple d'entrée
+et la sortie exacte attendue. Un exemple vaut mieux qu'un adjectif.}
+
+\begin{astuce}
+Avant de lancer une tâche, finis mentalement la phrase « je saurai que c'est
+réussi quand… ». Si tu ne peux pas la terminer par quelque chose d'observable,
+ta tâche n'est pas encore prête : il manque le critère, et c'est toi qui
+serviras de critère à la main, à chaque essai.
+\end{astuce}
+
+\section{Anti-patterns de formulation, et comment les corriger}
+
+\paragraphe{Les ratés se répètent. Les nommer aide à les repérer dans tes propres
+demandes. En voici quatre, chacun avec sa version corrigée et le critère qui
+prouve la correction.}
+
+\paragraphe{\important{Le vœu pieux.} Tu décris un état d'esprit, pas un
+résultat : « rends le code plus propre », « optimise ça », « améliore la
+lisibilité ». L'agent fait quelque chose, tu ne sais pas quoi évaluer. Correction :
+remplace l'adjectif par une action observable. Au lieu de « rends ce module plus
+maintenable », écris « extrais la logique de validation dans une fonction
+\code{validate} et ajoute un test pour chaque cas d'erreur ». Critère : la
+fonction existe, les tests passent.}
+
+\paragraphe{\important{Le périmètre fuyant.} Tu demandes une chose et tu laisses
+la porte ouverte à dix autres : « corrige ce bug (et tant qu'à faire, mets à jour
+ce qui traîne) ». L'agent élargit, le \terme{diff} enfle, tu ne peux plus le
+relire. Correction : borne explicitement. « Corrige uniquement ce bug ; ne touche
+à aucun autre fichier ; si tu vois autre chose à faire, liste-le sans le faire ».
+Critère : le diff ne touche que le fichier visé.}
+
+\paragraphe{\important{Le contexte fantôme.} Tu supposes que l'agent sait ce que
+tu as en tête : « tu sais, fais comme l'autre endpoint ». Quel autre endpoint ?
+L'agent invente une référence plausible. Correction : nomme la source. « Reproduis
+le schéma de \code{routes/users.js}, lignes 40 à 70, pour le nouvel endpoint ».
+Critère : le nouveau code suit la même structure, vérifiable côte à côte.}
+
+\paragraphe{\important{Le test absent.} Tu décris parfaitement le travail mais tu
+oublies de dire comment on vérifie qu'il est fait : l'agent s'arrête où il veut.
+Correction : ajoute toujours la dernière ligne. « …et ajoute un test qui échoue
+sans ta correction et passe avec ». Critère : le test existe et a bien ce
+comportement — il rougit avant, verdit après.}
+
+\begin{liste}
+  \element{Vœu pieux → remplace l'adjectif par une action observable.}
+  \element{Périmètre fuyant → dis ce qui est exclu, pas seulement inclus.}
+  \element{Contexte fantôme → nomme la source au lieu d'y faire allusion.}
+  \element{Test absent → termine par « …et prouve-le par un test ».}
+\end{liste}
+
+\paragraphe{Tu remarqueras que les quatre corrections ramènent aux quatre
+ingrédients du début : but, contexte, périmètre, critère. C'est tout ce chapitre
+en une boucle. Reformuler une demande agaçante en tâche délégable, ce n'est pas
+un don : c'est passer ces quatre points en revue et combler celui qui manque.}
+
+\resumeChapitre{
+  \element{\important{Quatre ingrédients} : toute tâche délégable réunit un but clair, un contexte suffisant, un périmètre borné et un critère de succès vérifiable — un ingrédient manquant et l'agent devine.}
+  \element{\important{Découper} : une grosse demande produit un diff géant impossible à relire ; découpe en sous-tâches dont chacune a son propre critère de succès, et valide l'une avant de lancer la suivante.}
+  \element{\important{Contexte ciblé} : pointe l'agent vers les bons fichiers plutôt que de tout coller — trop d'information dilue les détails qui comptent.}
+  \element{\important{Critère exécutable} : le meilleur critère est un test qui passe ou une commande sans erreur ; « ça marche » n'est pas un critère, c'est un avis.}
+  \element{\important{Anti-patterns} : vœu pieux, périmètre fuyant, contexte fantôme, test absent — ces quatre défauts se corrigent chacun en rajoutant l'ingrédient qui manque.}
+}
+
+\paragraphe{Il reste un ingrédient qu'on a effleuré sans creuser : le contexte.
+On a dit qu'il fallait le donner ciblé, et que l'implicite — conventions,
+contraintes, pièges — comptait plus que le volume. Mais le contexte n'est pas
+qu'une question de formulation ponctuelle : c'est une ressource limitée qui se
+remplit, sature et se gère au fil d'une \terme{session}. C'est l'objet du
+chapitre suivant.}

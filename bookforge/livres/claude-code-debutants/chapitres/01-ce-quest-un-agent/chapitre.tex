@@ -1,0 +1,220 @@
+%% Chapitre 01 — Ce qu'est vraiment un agent de code (et ce qu'il n'est pas)
+%% RÈGLE : uniquement des commandes sémantiques bookforge. Aucun \chapter,
+%% \textbf, \begin{lstlisting}, \vspace... brut.
+
+\chapitre{Ce qu'est vraiment un agent de code (et ce qu'il n'est pas)}
+
+\introChapitre{
+  Avant de lancer quoi que ce soit, il faut tuer les fausses intuitions. Un
+  agent de code n'est ni une autocomplétion améliorée, ni un oracle. Ce chapitre
+  pose le modèle mental durable qui rend tout le reste compréhensible : boucle
+  perception-action, contexte, outils, et la place du développeur comme donneur
+  d'ordre et vérificateur.
+}
+
+\section{Du chatbot à l'agent : la différence fondamentale}
+
+\paragraphe{Tu connais déjà l'assistant conversationnel : tu poses une question,
+il répond du texte, tu copies ce qui t'arrange. La conversation est un
+aller-retour. Le modèle ne touche à rien : il ne lit pas tes fichiers, ne lance
+pas tes tests, ne voit pas si son code compile. C'est à toi de faire le pont
+entre sa réponse et ton projet.}
+
+\paragraphe{Un \terme{agent} fonctionne autrement. C'est un programme fondé sur
+un modèle de langage qui, en plus de produire du texte, agit en boucle : il
+choisit une action, l'exécute, observe le résultat, puis décide de la suite. Lire
+un fichier, lancer une commande, modifier du code, relire l'erreur renvoyée :
+chaque tour le rapproche d'un but que tu lui as fixé. La différence n'est pas
+cosmétique. L'assistant te donne une réponse ; l'agent mène une tâche.}
+
+\paragraphe{Concrètement, cette boucle ressemble à ceci, répétée jusqu'à ce que
+le but soit atteint ou que l'agent te rende la main :}
+
+\begin{liste}
+  \element{\important{Percevoir} : lire ce qui est disponible (un fichier, la
+  sortie d'une commande, ton message).}
+  \element{\important{Décider} : choisir la prochaine action en fonction du but
+  et de ce qui vient d'être perçu.}
+  \element{\important{Agir} : exécuter cette action via un outil (éditer un
+  fichier, lancer un test, chercher dans le dépôt).}
+  \element{\important{Observer} : lire le résultat de l'action, puis recommencer.}
+\end{liste}
+
+\paragraphe{Ce qui rend cette boucle utile, ce sont les outils. Sans eux, le
+modèle ne ferait que parler. Avec eux, il manipule ton environnement : il ouvre
+des fichiers, exécute des commandes shell, applique des modifications. Un agent
+de code est donc l'addition de trois choses : un modèle qui raisonne, une boucle
+qui enchaîne les actions, et des outils qui le relient à ton dépôt.}
+
+\begin{note}
+Retiens cette image : l'assistant est un consultant au téléphone, l'agent est un
+stagiaire assis à ton poste. Le second peut faire beaucoup plus de bien comme de
+dégâts. Tout ce livre tient dans cette nuance.
+\end{note}
+
+\section{Ce qu'un agent voit et ne voit pas : la notion de contexte}
+
+\paragraphe{Un agent ne raisonne pas sur ton projet. Il raisonne sur son
+\terme{contexte} : l'ensemble des informations qu'il a effectivement sous les
+yeux à un instant donné. Cela comprend tes instructions, l'historique de la
+session en cours, les fichiers qu'il a lus et les résultats des commandes qu'il a
+lancées. Tout le reste, pour lui, n'existe pas.}
+
+\paragraphe{C'est la source de la plupart des malentendus du débutant. Tu sais
+que ta fonction d'authentification vit dans un certain module ; l'agent, lui, ne
+le sait que s'il a lu ce fichier ou si tu le lui as dit. Ce qu'il ignore, il
+l'invente ou l'omet. Un agent qui « se trompe de fichier » n'est souvent qu'un
+agent à qui personne n'a montré le bon fichier.}
+
+\paragraphe{D'où une règle de travail que tu appliqueras sans cesse :
+l'information pertinente doit entrer dans le contexte avant que l'agent en ait
+besoin. Lui demander de corriger un bug sans lui indiquer où regarder, c'est
+l'obliger à deviner l'architecture de ton projet. Lui pointer le fichier, le
+message d'erreur exact et le comportement attendu, c'est lui donner de quoi
+réussir.}
+
+\begin{astuce}
+Avant de déléguer, pose-toi une question simple : « De quoi l'agent a-t-il besoin
+sous les yeux pour réussir ? » Puis mets-le dans le contexte, explicitement.
+Cette habitude vaut plus que n'importe quelle formule de prompt astucieuse.
+\end{astuce}
+
+\paragraphe{Le contexte a une autre conséquence, plus subtile. Il s'accumule au
+fil de la session : plus la conversation s'allonge, plus l'agent traîne
+d'informations anciennes, dont certaines ne servent plus. On verra dans les
+chapitres suivants que ce contexte n'est pas infini et qu'on le gère activement.
+Pour l'instant, garde l'essentiel : l'agent est exactement aussi pertinent que ce
+qu'il a sous les yeux, ni plus, ni moins.}
+
+\section{Pourquoi un agent se trompe : probabiliste, pas déterministe}
+
+\paragraphe{Un compilateur est déterministe : même entrée, même sortie, toujours.
+Un agent ne l'est pas. Au cœur, un modèle de langage prédit la suite la plus
+probable d'un texte. Il ne calcule pas la bonne réponse ; il produit une réponse
+plausible. La plupart du temps, plausible et correct coïncident. Parfois non.}
+
+\paragraphe{Cela change ta façon de travailler. Tu ne dois jamais supposer qu'une
+sortie d'agent est juste parce qu'elle est bien écrite. Un agent peut t'inventer
+une fonction qui n'existe pas, supposer un comportement d'API qu'il n'a pas
+vérifié, ou produire un raisonnement convaincant mais faux. Le danger n'est pas
+qu'il se trompe : c'est qu'il se trompe avec aplomb, dans une prose impeccable.}
+
+\paragraphe{Deux conséquences pratiques, qui structurent tout le livre :}
+
+\begin{liste}
+  \element{Le même prompt peut donner deux résultats différents. La répétabilité
+  n'est pas garantie ; ne construis pas un processus qui suppose le contraire.}
+  \element{La sortie doit toujours être vérifiée. Pas par méfiance de principe,
+  mais parce que la nature de l'outil l'exige.}
+\end{liste}
+
+\begin{avertissement}
+Le piège classique du débutant : accepter une modification parce qu'elle « a
+l'air bonne ». Un code qui se lit bien n'est pas un code qui marche. La seule
+preuve, ce sont les tests qui passent, la commande qui s'exécute, le comportement
+observé. On y reviendra longuement.
+\end{avertissement}
+
+\paragraphe{Comprendre cette nature probabiliste, ce n'est pas se méfier de
+l'agent : c'est savoir où placer ton effort. Tu cesses d'espérer une machine
+infaillible et tu deviens celui qui cadre la tâche et contrôle le résultat. C'est
+un bien meilleur poste.}
+
+\section{Le développeur reste responsable : déléguer n'est pas abdiquer}
+
+\paragraphe{Voici le point que les guides « promptez mieux » évitent soigneusement :
+quoi que produise l'agent, c'est toi qui réponds du résultat. Tu signes le commit.
+Tu déploies. Si le code casse la production, personne n'ira blâmer le modèle.
+Déléguer une tâche ne transfère pas la responsabilité ; il déplace seulement où tu
+dépenses ton attention.}
+
+\paragraphe{Ton rôle se redéfinit donc en deux temps. En amont, tu es le donneur
+d'ordre : tu formules ce qu'il faut faire, tu fournis le contexte, tu bornes le
+périmètre. En aval, tu es le vérificateur : tu relis ce que l'agent a produit, tu
+le mets à l'épreuve, tu acceptes ou tu refuses. Entre les deux, l'agent travaille,
+mais le jugement reste de ton côté.}
+
+\paragraphe{Cette posture a un nom utile : la confiance outillée. On ne fait pas
+une confiance aveugle à l'agent, et on ne refait pas non plus son travail à la
+main, sinon il ne sert à rien. On met en place des dispositifs qui rendent son
+travail vérifiable et réversible : relire les modifications proposées, travailler
+sur une branche, exiger une approbation avant les actions risquées. Ces
+dispositifs feront l'objet de chapitres entiers.}
+
+\begin{note}
+Déléguer à un agent ressemble beaucoup à déléguer à un collègue junior compétent
+mais sans contexte sur ton projet. Tu lui donnes une tâche claire, tu réponds à
+ses questions, puis tu relis son travail avant de le valider. La compétence n'est
+pas de « lui faire confiance » : c'est de l'encadrer pour que sa confiance soit
+méritée.
+\end{note}
+
+\section{Le paysage 2026 et la place de Claude Code}
+
+\paragraphe{Les agents de code ne sont pas un produit unique mais une famille
+d'outils. Certains vivent dans ton éditeur, intégrés à l'autocomplétion. D'autres
+sont des services en ligne qui ouvrent une pull request à partir d'un ticket.
+D'autres encore opèrent dans le terminal, au plus près du dépôt. Les noms et les
+parts de marché bougent vite ; les principes, eux, sont stables et c'est sur eux
+que ce livre s'appuie.}
+
+\paragraphe{Ce livre se concentre sur \terme{Claude Code}, l'agent de
+développement en ligne de commande d'Anthropic. Le choix est délibéré. Claude
+Code opère directement dans ton dépôt : il lit le code, propose et applique des
+modifications, lance des commandes, et demande ton approbation selon les règles
+que tu configures. Tu travailles dans ton terminal, là où tu es déjà, sans
+quitter ton flux habituel.}
+
+\paragraphe{Ce positionnement « dans le terminal, dans le dépôt » a deux vertus
+pour apprendre. D'abord, tu vois tout : les fichiers lus, les commandes lancées,
+les modifications proposées passent sous tes yeux. Ensuite, les garde-fous sont
+explicites : c'est toi qui décides ce qui s'exécute sans confirmation et ce qui
+exige ton feu vert. Un agent qui agit sous tes yeux, c'est un agent qu'on apprend
+vite à encadrer.}
+
+\begin{avertissement}
+L'écosystème des agents de code évolue d'un trimestre à l'autre : commandes,
+options, tarifs, outils connectés. Dans ce livre, les chapitres sensibles à ces
+détails le signalent et t'indiquent comment vérifier l'état courant. Quand un
+écran ne correspond plus exactement à ce qui est décrit, le principe sous-jacent,
+lui, tient toujours.
+\end{avertissement}
+
+\section{Les trois compétences à acquérir : déléguer, vérifier, encadrer}
+
+\paragraphe{Si tu ne devais retenir qu'une chose de ce chapitre, ce serait la
+carte des compétences à construire. Bien utiliser un agent ne se résume pas à
+écrire de bons prompts. Trois savoir-faire, complémentaires, font toute la
+différence entre un gadget et un vrai gain de productivité.}
+
+\begin{liste}
+  \element{\important{Déléguer} : transformer une intention floue en une tâche
+  qu'un agent peut réussir, avec un but clair, le contexte nécessaire et un
+  périmètre borné. C'est la compétence d'entrée.}
+  \element{\important{Vérifier} : mettre la sortie de l'agent à l'épreuve plutôt
+  que la croire sur parole, parce que sa nature probabiliste l'exige. C'est la
+  compétence qui te protège.}
+  \element{\important{Encadrer} : poser des garde-fous pour que les erreurs
+  restent sans gravité et réversibles, et pour surveiller au passage l'effort et
+  le coût. C'est la compétence qui rend l'usage durable.}
+\end{liste}
+
+\paragraphe{Ces trois compétences se renforcent l'une l'autre. Mieux tu délègues,
+moins l'agent dérape, donc plus la vérification est légère. Mieux tu encadres,
+moins une erreur coûte cher, donc plus tu oses déléguer. Le reste du livre les
+décline, une couche après l'autre, jusqu'à la coordination de plusieurs agents
+sur un même chantier.}
+
+\resumeChapitre{
+  \element{\important{Boucle perception-action} : l'agent perçoit, décide, agit et observe en boucle — ce n'est pas un chatbot qui répond, c'est un programme qui mène une tâche.}
+  \element{\important{Contexte} : l'agent ne raisonne que sur ce qu'il a sous les yeux. Ce que tu ne lui montres pas n'existe pas pour lui ; pointe les bons fichiers avant de déléguer.}
+  \element{\important{Nature probabiliste} : l'agent produit ce qui est plausible, pas ce qui est certain. Relis toujours sa sortie plutôt que de la croire sur parole.}
+  \element{\important{Responsabilité} : déléguer une tâche ne transfère pas la responsabilité. Tu signes le commit, tu restes le vérificateur final.}
+  \element{\important{Trois compétences} : déléguer (cadrer la tâche), vérifier (tester la sortie) et encadrer (poser des garde-fous) forment le triptyque qui rend l'usage durable.}
+}
+
+\paragraphe{Tu as maintenant le modèle mental : une boucle d'actions, un contexte
+qui borne ce que l'agent sait, une nature probabiliste qui impose la
+vérification, et un développeur qui reste aux commandes. Il est temps de passer
+des principes à la pratique. Au prochain chapitre, on part d'un terminal vide
+pour arriver à une première session de Claude Code qui répond dans ton dépôt.}

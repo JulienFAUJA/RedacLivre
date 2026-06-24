@@ -1,0 +1,16 @@
+{
+  "id": "10",
+  "titre": "Connecter des outils externes avec MCP",
+  "intro": "Un agent gagne en puissance quand il peut parler à tes autres outils : base de données, gestionnaire de tickets, documentation. Ce chapitre, daté car l'écosystème évolue, explique le principe du protocole MCP et comment brancher une première intégration utile sans se faire piéger par les questions de confiance.",
+  "plan": [
+    "Le problème que résout MCP : donner des outils à l'agent",
+    "Principe : serveurs MCP, outils exposés, et l'agent qui les appelle",
+    "Brancher un premier serveur MCP utile",
+    "Choisir des intégrations fiables et limiter les permissions",
+    "Cas concrets : tickets, base de données, recherche documentaire",
+    "Risques de confiance et bonnes pratiques de cadrage"
+  ],
+  "depend_de": ["07"],
+  "longueur_cible": 2100,
+  "statut": "redige"
+}

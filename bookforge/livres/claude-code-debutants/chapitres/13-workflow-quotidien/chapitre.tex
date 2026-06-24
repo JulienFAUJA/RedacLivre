@@ -1,0 +1,186 @@
+%% Chapitre 13 — Intégrer Claude Code dans ton workflow quotidien.
+%% RÈGLE : uniquement des commandes sémantiques bookforge. Aucun terme
+%% du glossaire n'est réintroduit ici (tous déjà vus dans les chapitres
+%% précédents) : aucun \terme{} n'est marqué.
+
+\chapitre{Intégrer Claude Code dans ton workflow quotidien}
+
+\introChapitre{
+  Dernier chapitre : on assemble tout en habitudes durables. Comment l'agent
+  prend sa place dans ta journée, ton dépôt et ton équipe, sans devenir une
+  béquille ni un risque. On clôt sur une routine réaliste et sur la manière de
+  continuer à progresser quand l'outil évoluera.
+}
+
+\paragraphe{Tu sais maintenant l'essentiel : reformuler une tâche pour la rendre
+délégable, soigner le contexte que tu donnes, relire le diff au lieu de faire
+confiance aveuglément, poser des garde-fous via les permissions, et orchestrer
+plusieurs subagents quand le chantier le mérite. Ces cinq réflexes ne valent que
+s'ils deviennent des \emphase{habitudes}. Ce chapitre les transforme en routine.}
+
+\section{Une journée type : où l'agent aide, où tu gardes la main}
+
+\paragraphe{Le matin, tu ouvres une session sur une intention floue : « comprends
+pourquoi le paiement échoue en recette ». L'agent excelle là. Il lit le code,
+suit les appels, te résume le chemin du bug. Tu n'aurais pas tapé ces dix
+\code{grep} toi-même. Tu \emphase{gardes la main} sur le diagnostic final : c'est
+toi qui décides si l'hypothèse tient.}
+
+\paragraphe{En milieu de matinée, le travail répétitif. Migrer trente fichiers
+vers une nouvelle signature, écrire les tests d'un module déjà spécifié, mettre
+à jour la doc après un renommage. Tâches bornées, critère de succès clair :
+délègue sans hésiter, relis le diff par paquets.}
+
+\paragraphe{L'après-midi, une décision d'architecture. Là, l'agent propose mais
+ne tranche pas. Demande-lui deux options et leurs compromis, puis \emphase{décide
+toi-même}. Pareil pour tout ce qui touche au sensible : secrets, migration de
+base en production, suppression massive. L'agent reste un exécutant brillant et
+faillible ; l'arbitrage et la responsabilité restent à toi.}
+
+\begin{note}
+Une bonne répartition tient en une phrase : délègue ce que tu saurais vérifier,
+garde ce que tu serais incapable de relire. Si tu ne peux pas juger le résultat,
+tu ne délègues pas, tu paries.
+\end{note}
+
+\section{Conventions de dépôt et d'équipe}
+
+\paragraphe{Dès que vous êtes plusieurs sur un dépôt, l'usage de l'agent doit
+être \emphase{partagé}, pas réinventé par chacun. Le pivot, c'est la mémoire
+projet : un fichier versionné qui dit à l'agent comment se comporter ici. Tout le
+monde en hérite, tout le monde l'améliore.}
+
+\paragraphe{Un squelette minimal suffit pour démarrer une équipe :}
+
+\begin{liste}
+  \element{Conventions de code et de tests : commandes de lint et de build,
+  style attendu, ce qui est interdit (toucher aux migrations, par exemple).}
+  \element{Permissions par défaut versionnées : ce qui s'exécute seul, ce qui
+  demande approbation. Les garde-fous deviennent un choix d'équipe, pas une
+  préférence individuelle.}
+  \element{Slash commands partagées pour les tâches récurrentes du projet :
+  « prépare la revue », « écris les tests du module X » — une fois écrites, tout
+  le monde les rejoue.}
+\end{liste}
+
+\paragraphe{Côté collaboration humaine, garde une règle simple : un changement
+produit par l'agent passe la \emphase{même revue} qu'un changement humain. Ni
+plus laxiste parce que « c'est l'agent », ni plus méfiant. C'est du code à
+relire, point. Indique dans le message de commit qu'il a été assisté : ça aide
+l'équipe à calibrer sa vigilance.}
+
+\begin{avertissement}
+Ne committe jamais la sortie d'une session que personne n'a relue, surtout sur
+une branche partagée. « Ça compilait » n'est pas une revue. Un diff vert peut
+cacher une hallucination parfaitement plausible.
+\end{avertissement}
+
+\section{Construire tes propres routines}
+
+\paragraphe{Les bonnes habitudes ne s'improvisent pas à chaud, elles
+s'\emphase{outillent}. À chaque fois que tu te surprends à réécrire la même
+consigne — « relis d'abord, ne touche pas aux tests, montre-moi un plan avant
+d'agir » — tu tiens une routine à figer.}
+
+\paragraphe{Deux familles de routines reviennent tout le temps. Les routines de
+délégation : un prompt-type qui pose le but, le périmètre et le critère de
+succès, prêt à remplir. Les routines de vérification : ta liste de contrôle
+avant d'accepter un diff.}
+
+\begin{extraitcode}{text}
+Avant d'accepter un diff de l'agent :
+- [ ] J'ai lu chaque ligne, pas seulement le résumé.
+- [ ] Les tests passent ET un test échoue si je casse le code volontairement.
+- [ ] Aucune fonction/API inventée : j'ai vérifié les noms douteux.
+- [ ] Le périmètre est respecté : rien n'a changé hors de la demande.
+- [ ] Secrets, migrations, prod : intacts ou validés explicitement.
+\end{extraitcode}
+
+\paragraphe{Encapsule ces routines là où elles vivront : une slash command pour
+la délégation, un hook pour automatiser le formatage et les tests après chaque
+modification. Ta liste de vérification, elle, reste sous \emphase{tes} yeux —
+c'est ton jugement, pas celui de l'agent, qui valide.}
+
+\section{Mesurer si l'agent te fait vraiment gagner}
+
+\paragraphe{Le danger silencieux, c'est l'illusion de productivité : tu passes
+vingt minutes à corriger un diff que tu aurais écrit en quinze. Pour le voir, il
+faut \emphase{mesurer}, même grossièrement.}
+
+\paragraphe{Garde en tête trois signaux, sur quelques semaines :}
+
+\begin{liste}
+  \element{Temps réel de bout en bout : briefer plus relire plus corriger,
+  comparé à « je l'aurais fait moi-même ». Sur les tâches répétitives bornées,
+  l'agent gagne presque toujours ; sur le pointu très contextuel, souvent non.}
+  \element{Taux de reprise : combien de fois tu relances ou réécris derrière lui.
+  S'il est élevé sur un type de tâche, le problème est ta consigne ou le
+  périmètre, pas l'agent.}
+  \element{Coût en jetons rapporté à la valeur : une session qui brûle beaucoup
+  pour un résultat que tu jettes n'est pas un gain, même si elle « marche ».}
+\end{liste}
+
+\paragraphe{La conclusion utile n'est pas « l'agent est bon ou mauvais », mais
+« sur \emphase{quelles} tâches il me fait gagner ». Délègue franchement celles-là,
+reprends la main sur les autres. Cette carte personnelle vaut plus que n'importe
+quel conseil général.}
+
+\section{Rester à jour quand l'outil change}
+
+\paragraphe{Claude Code évolue vite : commandes, options, tarifs, écosystème
+d'outils branchés en MCP. Les détails de ce livre dateront ; son
+\emphase{esprit}, non. C'est voulu.}
+
+\paragraphe{Sépare donc deux niveaux. Les \emphase{détails} — nom exact d'un
+drapeau, prix au jeton, dernière fonctionnalité — se vérifient à la source, dans
+la documentation officielle, au moment où tu en as besoin. Ne les mémorise pas :
+ils périment. Les \emphase{principes} — penser la délégation, soigner le contexte,
+vérifier le diff, encadrer par les permissions, orchestrer — ne bougent pas. Ils
+survivront à trois changements d'interface.}
+
+\begin{astuce}
+Quand une nouveauté apparaît, ne demande pas « comment ça marche » mais « quel
+principe connu ça sert ». Un nouvel outil branché en MCP, c'est juste plus de
+contexte ou plus d'actions : tu sais déjà l'évaluer, le borner, le vérifier.
+\end{astuce}
+
+\section{Tes prochaines semaines avec Claude Code}
+
+\paragraphe{Termine sur du concret. Voici un plan de montée en compétence sur un
+mois, une étape par semaine, à adapter à ton rythme.}
+
+\begin{listeNumerotee}
+  \element{\emphase{Semaine 1 — déléguer pour de vrai.} Confie à l'agent trois
+  tâches bornées par jour : un test, un petit refactor, une correction. Relis
+  chaque diff intégralement. Objectif : ressentir où il aide.}
+  \element{\emphase{Semaine 2 — encadrer.} Écris la mémoire projet de ton dépôt
+  principal et fixe tes permissions par défaut. Pose un hook qui lance tes tests
+  après chaque modification. Tu construis tes garde-fous.}
+  \element{\emphase{Semaine 3 — industrialiser.} Transforme tes deux consignes
+  les plus répétées en slash commands. Tiens ta liste de vérification à chaque
+  diff jusqu'à ce qu'elle devienne un réflexe.}
+  \element{\emphase{Semaine 4 — orchestrer et mesurer.} Découpe un vrai chantier
+  en sous-tâches confiées à des subagents. En parallèle, note tes trois signaux
+  pour dresser ta carte « où l'agent me fait gagner ».}
+\end{listeNumerotee}
+
+\paragraphe{Après ce mois, tu n'auras plus besoin de plan : tu auras des
+habitudes. C'est tout l'enjeu de ce livre — non pas savoir ce que fait l'outil,
+mais savoir \emphase{travailler avec}, lucidement, sans naïveté ni méfiance
+paralysante.}
+
+\begin{astuce}
+Tu sais coder, et tu sais maintenant déléguer, vérifier, encadrer, orchestrer.
+Ce ne sont pas des recettes pour un outil donné : c'est une façon de penser ton
+métier qui restera vraie quand l'agent d'aujourd'hui aura été remplacé par celui
+de demain. Ouvre une session, confie-lui ta prochaine tâche, et relis son diff
+avec ces yeux-là. C'est là que ton vrai apprentissage commence.
+\end{astuce}
+
+\resumeChapitre{
+  \element{\important{Répartition journalière} : délègue l'exploration et le mécanique répétitif, garde le diagnostic final, les décisions d'architecture et tout ce qui touche au sensible.}
+  \element{\important{Mémoire projet d'équipe} : versionne conventions, permissions et slash commands dans le dépôt — un bien commun que tout le monde améliore et dont tout le monde hérite.}
+  \element{\important{Routines outillées} : encapsule tes prompts-types en slash commands, automatise le formatage et les tests en hooks, tiens ta liste de vérification sous les yeux.}
+  \element{\important{Mesurer le gain réel} : note temps total, taux de reprise et coût en jetons sur quelques semaines pour dresser ta carte personnelle « où l'agent me fait gagner ».}
+  \element{\important{Principes durables, détails périssables} : les fonctionnalités et les prix changent ; déléguer, vérifier, encadrer, orchestrer restent vrais quel que soit l'outil de demain.}
+}

@@ -1,0 +1,16 @@
+{
+  "id": "06",
+  "titre": "Vérifier le travail de l'agent",
+  "intro": "Accepter un diff sans le comprendre, c'est signer un chèque en blanc. Ce chapitre durable est le cœur de la promesse du livre : des méthodes concrètes pour relire, tester et challenger ce que produit l'agent, sans devoir tout réécrire à la main. Vérifier vite et bien est ce qui rend la délégation rentable.",
+  "plan": [
+    "Pourquoi la vérification n'est pas optionnelle",
+    "Lire un diff efficacement : ce qu'on regarde en priorité",
+    "Faire produire et exécuter des tests pour prouver le travail",
+    "Demander à l'agent d'expliquer et de justifier ses choix",
+    "Repérer le code plausible mais faux (hallucinations subtiles)",
+    "Boucle de correction : renvoyer un retour précis et exploitable"
+  ],
+  "depend_de": ["05"],
+  "longueur_cible": 2500,
+  "statut": "redige"
+}

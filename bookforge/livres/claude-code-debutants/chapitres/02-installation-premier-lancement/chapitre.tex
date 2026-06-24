@@ -1,0 +1,234 @@
+%% Chapitre 02 — Installation et premier lancement
+%% RÈGLE : uniquement des commandes sémantiques bookforge. Aucun \chapter,
+%% \textbf, \begin{lstlisting}, \vspace... brut.
+
+\chapitre{Installation et premier lancement}
+
+\introChapitre{
+  On passe à la pratique. Ce chapitre, volontairement daté car les commandes
+  évoluent vite, t'amène d'un terminal vide à une première session Claude Code
+  qui répond dans ton dépôt. On vérifie l'installation, l'authentification, et
+  on lance un tout premier échange anodin pour prendre ses repères.
+}
+
+\paragraphe{Au chapitre précédent, on a posé le modèle mental : un agent
+perçoit, agit, observe, et tu restes responsable du résultat. Bien. Maintenant
+qu'on sait ce qu'est un agent, le plus simple pour le comprendre vraiment, c'est
+d'en lancer un. Ce chapitre est le plus terre-à-terre du livre : pas de grande
+idée, juste une suite d'étapes pour passer d'un terminal nu à un agent qui te
+répond dans ton propre dépôt.}
+
+\begin{avertissement}
+Ce chapitre cite des commandes, des noms de paquets et des versions. C'est
+exactement le genre de détail qui périme vite : un outil installé autrement
+dans six mois, un drapeau renommé, une procédure d'authentification revue. Tiens
+les \important{principes} (un gestionnaire de paquets, une vérification de
+version, une authentification, un premier lancement) pour acquis ; vérifie les
+\important{commandes exactes} dans la documentation officielle au moment où tu
+lis. En cas de doute, \code{claude --help} et la page d'installation en ligne
+sont les seules sources à jour.
+\end{avertissement}
+
+\section{Prérequis : terminal, Node, compte Anthropic}
+
+\paragraphe{Trois choses suffisent. Un terminal dans lequel tu es à l'aise,
+parce que Claude Code vit en ligne de commande et pas dans une fenêtre à part.
+Un environnement Node.js récent, car l'outil se distribue aujourd'hui comme un
+paquet \code{npm}. Et un compte Anthropic, qui servira à t'authentifier au
+premier lancement.}
+
+\paragraphe{Côté système, tout système Unix moderne convient : Linux et macOS
+nativement, Windows via WSL (le sous-système Linux) si la version native n'est
+pas encore stable au moment où tu lis. Tu sais déjà coder, donc je ne t'explique
+ni ce qu'est un terminal ni comment installer Node ; vérifie simplement que tu
+as une version maintenue.}
+
+\begin{extraitcode}{bash}
+# Vérifier qu'on a bien Node et npm avant de commencer
+node --version
+npm --version
+\end{extraitcode}
+
+\paragraphe{Si ces deux commandes renvoient un numéro de version, le terrain est
+prêt. Si Node manque ou date de plusieurs années, installe d'abord une version
+récente (idéalement la dernière LTS) avant d'aller plus loin. Un Node trop
+ancien est la cause numéro un des installations qui échouent sans message
+clair.}
+
+\begin{note}
+La distribution exacte de Claude Code peut évoluer : paquet \code{npm}
+aujourd'hui, installateur dédié ou binaire autonome demain. Le réflexe ne change
+pas : ouvre la page d'installation officielle, suis la méthode qui y est
+recommandée pour ton système, et reviens ici pour la suite.
+\end{note}
+
+\section{Installer Claude Code et vérifier la version}
+
+\paragraphe{L'installation tient en une commande. À l'état 2026, Claude Code
+s'installe comme paquet global via \code{npm}.}
+
+\begin{extraitcode}{bash}
+# Installation globale (méthode npm, état 2026)
+npm install -g @anthropic-ai/claude-code
+
+# Vérifier que la commande est disponible et connaître sa version
+claude --version
+\end{extraitcode}
+
+\paragraphe{Cette dernière ligne n'est pas une formalité. La version que tu vois
+détermine quelles fonctionnalités existent et comment elles se comportent. Quand
+tu suivras un tutoriel ou que tu liras un message d'aide, c'est ce numéro qui te
+dit si ce que tu lis s'applique à toi. Prends l'habitude de le vérifier, surtout
+après une mise à jour.}
+
+\begin{astuce}
+Garde Claude Code à jour, mais pas en aveugle. Avant une montée de version sur
+un projet sérieux, jette un œil aux notes de version : une commande peut avoir
+changé de nom ou de comportement. \code{npm update -g @anthropic-ai/claude-code}
+met à jour ; \code{claude --version} confirme le résultat.
+\end{astuce}
+
+\section{Authentification et configuration minimale}
+
+\paragraphe{Installé ne veut pas dire connecté. Au premier lancement, Claude
+Code a besoin de savoir qui tu es, pour rattacher ton usage à ton compte
+Anthropic. Tu lances la commande, et l'outil t'accompagne : il ouvre en général
+ton navigateur pour que tu te connectes, puis récupère un jeton qu'il stocke
+localement.}
+
+\begin{extraitcode}{bash}
+# Premier lancement : déclenche l'authentification si nécessaire
+claude
+\end{extraitcode}
+
+\paragraphe{Tu n'as quasiment rien à configurer pour démarrer. C'est volontaire :
+les réglages fins (permissions, mémoire projet, outils externes) viendront plus
+tard, quand tu en auras besoin. Pour l'instant, l'objectif est minimal : que
+l'agent réponde. La configuration, elle, se construit au fil des chapitres
+suivants, pas d'un coup ici.}
+
+\begin{avertissement}
+Le détail de l'authentification est précisément ce qui change le plus souvent :
+connexion par navigateur, clé d'API à coller, choix entre un abonnement et une
+facturation à l'usage. Ne mémorise pas une procédure figée. Retiens le principe :
+au premier lancement, tu prouves ton identité une fois, et l'outil garde un jeton
+pour les fois suivantes. Si l'écran que tu vois ne ressemble pas à ce qui est
+décrit ici, fie-toi à ce que l'outil t'affiche, pas à ce livre.
+\end{avertissement}
+
+\section{Lancer une première session dans un dépôt jouet}
+
+\paragraphe{Ne lance jamais ton tout premier agent sur ton projet le plus
+précieux. Crée un \terme{dépôt jouet} : un petit dépôt sans enjeu, dans lequel
+tu peux tout casser sans conséquence. C'est là qu'on ouvre notre première
+\terme{session} : une conversation continue avec l'agent, avec son propre
+contexte qui s'accumule au fil des échanges. Démarrer, reprendre ou
+réinitialiser une session, c'est piloter ce que l'agent se rappelle.}
+
+\begin{extraitcode}{bash}
+# Créer un petit dépôt sans enjeu, puis y lancer Claude Code
+mkdir bac-a-sable && cd bac-a-sable
+git init
+echo "# Bac à sable" > README.md
+
+# Démarrer une session dans CE répertoire
+claude
+\end{extraitcode}
+
+\paragraphe{Un point qui surprend souvent les débutants : l'agent travaille dans
+le répertoire d'où tu l'as lancé. Son contexte de départ, c'est ce dossier-là.
+Lancer Claude Code depuis le bon endroit n'est pas un détail, c'est ce qui
+définit le périmètre de ce qu'il voit et de ce qu'il peut toucher.}
+
+\paragraphe{Pour ce premier contact, demande quelque chose d'anodin et de
+vérifiable. Pas « refais mon projet », mais une question dont tu connais déjà la
+réponse, juste pour voir l'agent percevoir puis répondre.}
+
+\begin{extraitcode}{text}
+> Quels fichiers y a-t-il dans ce dépôt ? Résume-moi le README.
+\end{extraitcode}
+
+\paragraphe{Regarde ce qui se passe : l'agent ne devine pas, il va lire. Il
+liste le répertoire, ouvre le README, et te répond à partir de ce qu'il a
+réellement vu. C'est la boucle perception-action du chapitre précédent, sous tes
+yeux, sur ton propre dossier. Rien de magique, et c'est tant mieux : tu peux
+vérifier chaque affirmation.}
+
+\section{Anatomie de l'interface : prompt, réponses, indicateurs}
+
+\paragraphe{L'interface est sobre, et c'est une bonne nouvelle : il y a peu de
+choses à apprendre. Trois zones reviennent en permanence.}
+
+\begin{liste}
+  \element{\important{Le prompt} : la ligne où tu tapes ta demande. C'est ton
+  point d'entrée dans la session, l'équivalent de la barre d'adresse pour un
+  navigateur.}
+  \element{\important{Les réponses et les actions} : l'agent ne se contente pas
+  d'écrire du texte. Il t'annonce les actions qu'il entreprend (lire un fichier,
+  lancer une commande) et t'en montre le résultat. C'est là que tu suis ce qu'il
+  fait, pas seulement ce qu'il dit.}
+  \element{\important{Les indicateurs} : des repères discrets te signalent
+  l'état courant — l'agent réfléchit, attend ton approbation, ou a terminé.
+  Apprends à les lire : ils te disent à qui est la main, toi ou lui.}
+\end{liste}
+
+\paragraphe{Tu remarqueras vite que l'agent te demande parfois la permission
+avant d'agir, surtout pour les actions qui modifient quelque chose. Garde ce
+réflexe en tête sans t'y attarder maintenant : on consacrera un chapitre entier
+à ces garde-fous. Pour l'instant, il suffit de savoir qu'un agent bien réglé
+te demande avant de toucher à ce qui compte.}
+
+\begin{astuce}
+Le moyen le plus rapide de découvrir l'interface, ce n'est pas de tout lire,
+c'est d'essayer. Tape une commande d'aide dès ta première session pour voir les
+raccourcis et les commandes internes disponibles dans ta version.
+\end{astuce}
+
+\begin{extraitcode}{text}
+> /help
+\end{extraitcode}
+
+\section{Quitter proprement et reprendre une session}
+
+\paragraphe{Une session a un début et une fin. Tu la quittes proprement avec une
+commande de sortie ou le raccourci d'interruption habituel de ton terminal. Rien
+ne se perd côté code : l'agent travaille sur tes vrais fichiers, pas dans un
+bac fermé qui s'évapore.}
+
+\begin{extraitcode}{text}
+> /exit
+\end{extraitcode}
+
+\paragraphe{Ce qui disparaît en revanche, c'est le contexte accumulé pendant
+l'échange. Une nouvelle session repart sans mémoire de la précédente. C'est
+souvent ce que tu veux — un contexte propre évite que de vieux échanges
+parasitent une nouvelle tâche — mais pas toujours. Quand tu as construit un
+contexte utile et que tu veux le retrouver, tu peux \important{reprendre} la
+session précédente plutôt que d'en ouvrir une vierge.}
+
+\begin{extraitcode}{bash}
+# Reprendre la session précédente plutôt que repartir de zéro
+claude --continue
+\end{extraitcode}
+
+\begin{note}
+Le nom exact de l'option pour reprendre une session, comme tout le reste de ce
+chapitre, peut changer. Le principe est durable : une session porte un contexte,
+le quitter le met de côté, le reprendre le ramène. Savoir choisir entre
+« repartir propre » et « reprendre » est une vraie compétence ; on y reviendra
+quand le contexte deviendra une ressource à gérer.
+\end{note}
+
+\resumeChapitre{
+  \element{\important{Prérequis} : un terminal, Node.js récent et un compte Anthropic suffisent pour démarrer — vérifie les versions avant d'installer.}
+  \element{\important{Installation et version} : installe Claude Code via npm et contrôle immédiatement la version affichée ; c'est elle qui détermine les fonctionnalités disponibles.}
+  \element{\important{Dépôt jouet} : lance ta première session sur un projet sans enjeu, jamais sur ton code de production, pour apprivoiser l'outil sans risque.}
+  \element{\important{Répertoire de lancement} : l'agent travaille dans le dossier depuis lequel tu le lances — lancer depuis le bon endroit définit son périmètre d'action.}
+  \element{\important{Session} : quitter la session efface le contexte accumulé ; reprends-la avec \code{--continue} quand tu veux retrouver l'historique précédent.}
+}
+
+\paragraphe{Voilà : tu as installé Claude Code, ouvert une session, vu l'agent
+lire ton dépôt et répondre, puis quitté proprement. C'était volontairement
+inoffensif — un README résumé ne casse rien. Au chapitre suivant, on arrête les
+échauffements : on confie à l'agent une vraie petite tâche sur du vrai code, et
+on apprend à relire ce qu'il propose avant de l'accepter.}
