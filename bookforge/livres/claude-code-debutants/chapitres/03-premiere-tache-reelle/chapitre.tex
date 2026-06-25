@@ -104,11 +104,11 @@ utilisée par withdraw(). transfer() ne fait aucune validation. Je vais :
 Je te montre le changement avant de l'appliquer.
 \end{extraitcode}
 
-\paragraphe{Cet instant vaut de l'or. L'agent a trouvé tout seul l'exception
-\code{InvalidAmount} que tu avais peut-être oubliée, et il s'aligne dessus au
-lieu d'inventer un \code{ValueError} générique. C'est le bénéfice direct de
-l'intention plutôt que de la micro-instruction : il a comblé un manque de ton
-contexte à toi.}
+\paragraphe{Cet instant vaut de l'or. L'agent a retrouvé l'exception prévue par
+le projet : \code{InvalidAmount}. Tu l'avais peut-être oubliée ; lui s'aligne
+dessus au lieu d'inventer un \code{ValueError} générique. C'est le bénéfice
+direct de l'intention plutôt que de la micro-instruction : il a comblé un manque
+de ton contexte à toi.}
 
 \begin{note}
 Lis toujours le plan annoncé avant le code. Un plan qui parle de fichiers que
