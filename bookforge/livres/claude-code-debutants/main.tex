@@ -5,6 +5,10 @@
 %% ============================================================================
 \documentclass[11pt,openright]{book}
 
+%% Version papier KDP : conserve la table des matières et l'index, mais retire
+%% les annotations de liens interactifs que KDP signale comme non imprimables.
+\PassOptionsToPackage{draft}{hyperref}
+
 %% Les styles sont cherchés dans ../../styles (voir build.ps1 : TEXINPUTS).
 \usepackage[langue=fr]{bookforge}
 \usepackage{code-listings}
