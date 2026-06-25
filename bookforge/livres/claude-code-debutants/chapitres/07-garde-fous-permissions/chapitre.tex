@@ -131,18 +131,28 @@ identifiants de base de données, jetons : ils vont dans un fichier
 accident.
 \end{avertissement}
 
-\paragraphe{Tu peux soustraire des chemins entiers à la lecture de l'agent. Un
-fichier d'ignore dédié dit à Claude Code de ne pas ouvrir certains dossiers,
-même s'ils sont versionnés :}
+\paragraphe{Tu peux aussi soustraire des chemins entiers à la lecture de
+l'agent, même s'ils sont présents dans le dépôt. Le mécanisme courant passe par
+les règles de permission, dans \code{.claude/settings.json} :}
 
-\begin{extraitcode}{text}
-# .claudeignore — fichiers que l'agent n'ouvrira pas
-.env
-.env.*
-secrets/
-**/*.pem
-deploy/credentials.json
+\begin{extraitcode}{json}
+{
+  "permissions": {
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./secrets/**)",
+      "Read(./**/*.pem)",
+      "Read(./deploy/credentials.json)"
+    ]
+  }
+}
 \end{extraitcode}
+
+\paragraphe{Cette configuration ne se contente pas de cacher les fichiers dans
+une liste : elle refuse explicitement les lectures qui correspondent aux motifs
+déclarés. C'est plus robuste qu'un simple oubli volontaire, parce que la règle
+s'applique même si l'agent tombe sur le chemin pendant son exploration.}
 
 \paragraphe{Pense aussi aux secrets qui ne sont pas dans le dépôt mais dans ta
 session : ne colle pas une clé de production dans le chat « pour aller plus
@@ -167,7 +177,9 @@ d'actions \emphase{toujours refusées} (pour fermer définitivement des portes).
     "deny": [
       "Bash(rm *)",
       "Bash(git push --force*)",
-      "Read(.env)"
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./secrets/**)"
     ]
   }
 }
@@ -192,7 +204,7 @@ bouger.
   \element{\important{Opérations destructrices} : \code{rm}, \code{git push --force}, \code{DROP TABLE} et tout déploiement restent en approbation manuelle sans exception.}
   \element{\important{Branche dédiée} : travaille sur une branche avant de lancer l'agent — si ça part en vrille, \code{git checkout main} ramène tout à zéro en une commande.}
   \element{\important{Isolation} : lance l'agent depuis le dépôt concerné uniquement, jamais depuis ta racine personnelle, pour réduire sa surface d'action au strict nécessaire.}
-  \element{\important{Secrets} : les clés et identifiants vont dans \code{.env} ignoré par Git ; utilise \code{.claudeignore} pour soustraire les fichiers sensibles à la lecture de l'agent.}
+  \element{\important{Secrets} : les clés et identifiants vont dans \code{.env} ignoré par Git ; ajoute des règles \code{permissions.deny} pour refuser explicitement la lecture des fichiers sensibles.}
   \element{\important{Règles sur mesure} : liste blanche pour les actions anodines et répétitives, liste noire pour le destructeur et le sensible — la ceinture qui ne se fait sentir que quand ça compte.}
 }
 

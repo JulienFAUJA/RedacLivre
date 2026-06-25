@@ -33,7 +33,7 @@ claude --resume
 /clear         # Vider le contexte de la session en cours
 /compact       # Résumer et compresser l'historique
 /memory        # Afficher ou éditer la mémoire projet
-/cost          # Afficher le coût de la session en cours
+/usage         # Afficher l'usage et les limites disponibles
 /exit          # Quitter proprement
 \end{extraitcode}
 
@@ -42,14 +42,17 @@ claude --resume
 \paragraphe{Contrôler ce que Claude Code peut faire sans te demander :}
 
 \begin{extraitcode}{bash}
-# Autoriser une commande spécifique pour la session
-/allowed-tools
+# Voir ou ajuster les permissions pendant la session
+/permissions
 
-# Lancer en mode lecture seule (aucune modification)
-claude --no-write
+# Lancer en mode plan : explorer avant de modifier
+claude --permission-mode plan
+
+# Lancer en mode acceptEdits : autoriser les éditions dans le dépôt
+claude --permission-mode acceptEdits
 
 # Lancer en mode autonome (approuve tout automatiquement)
-# À réserver aux pipelines CI, jamais en interactif
+# À réserver aux environnements isolés
 claude --dangerously-skip-permissions
 \end{extraitcode}
 
@@ -136,19 +139,24 @@ observable, uniquement la structure."
       "matcher": "Bash",
       "hooks": [{
         "type": "command",
-        "command": "echo '[Hook] Commande : $CLAUDE_TOOL_INPUT_COMMAND'"
+        "if": "Bash(rm *)",
+        "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/block-rm.sh"
       }]
     }],
     "PostToolUse": [{
-      "matcher": "Edit",
+      "matcher": "Write|Edit|MultiEdit",
       "hooks": [{
         "type": "command",
-        "command": "npm run lint --silent 2>&1 | head -5"
+        "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/format-edited-file.sh"
       }]
     }]
   }
 }
 \end{extraitcode}
+
+\paragraphe{Les scripts appelés par ces hooks lisent le contexte de l'action en
+JSON sur \code{stdin}. Évite les exemples qui supposent des variables
+d'environnement magiques : elles vieillissent mal et cassent en silence.}
 
 \section{Commandes MCP courantes}
 
@@ -159,18 +167,18 @@ claude mcp list
 # Ajouter un serveur MCP local
 claude mcp add mon-outil -- node /chemin/vers/server.js
 
-# Ajouter un serveur MCP distant (SSE)
-claude mcp add mon-api --transport sse https://api.exemple.com/mcp
+# Ajouter un serveur MCP HTTP au niveau du projet
+claude mcp add --transport http mon-api --scope project https://mcp.example.com/mcp
 \end{extraitcode}
 
 \section{Surveillance des coûts}
 
 \begin{extraitcode}{bash}
-# Coût de la session courante (dans la session)
-/cost
+# Usage et limites disponibles (dans la session)
+/usage
 
-# Voir l'usage via l'API Anthropic
-# → console.anthropic.com/usage
+# Voir l'usage côté Console Anthropic
+# -> console.anthropic.com/usage
 \end{extraitcode}
 
 \begin{note}
@@ -190,6 +198,6 @@ tâche, c'est souvent le signe qu'il faut la découper.
   la CI uniquement.}
   \element{\important{Vérification} : lire le diff, lancer les tests, contrôler
   le périmètre — à chaque délégation, sans exception.}
-  \element{\important{Coûts} : \code{/cost} en session, sessions courtes et
+  \element{\important{Coûts} : \code{/usage} en session, sessions courtes et
   ciblées pour maîtriser la facture.}
 }

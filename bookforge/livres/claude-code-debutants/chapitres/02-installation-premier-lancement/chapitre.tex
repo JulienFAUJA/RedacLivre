@@ -29,47 +29,57 @@ lis. En cas de doute, \code{claude --help} et la page d'installation en ligne
 sont les seules sources à jour.
 \end{avertissement}
 
-\section{Prérequis : terminal, Node, compte Anthropic}
+\section{Prérequis : terminal, compte Anthropic}
 
 \paragraphe{Trois choses suffisent. Un terminal dans lequel tu es à l'aise,
 parce que Claude Code vit en ligne de commande et pas dans une fenêtre à part.
-Un environnement Node.js récent, car l'outil se distribue aujourd'hui comme un
-paquet \code{npm}. Et un compte Anthropic, qui servira à t'authentifier au
-premier lancement.}
+Un compte Anthropic, une Console Claude ou un accès entreprise pris en charge,
+qui servira à t'authentifier au premier lancement. Et, côté système, un
+environnement de développement classique : Git, un shell et les outils habituels
+de ton projet. Node.js n'est nécessaire que si \emphase{ton projet} ou un
+serveur MCP que tu installes en dépend, pas pour installer Claude Code dans le
+cas général.}
 
-\paragraphe{Côté système, tout système Unix moderne convient : Linux et macOS
-nativement, Windows via WSL (le sous-système Linux) si la version native n'est
-pas encore stable au moment où tu lis. Tu sais déjà coder, donc je ne t'explique
-ni ce qu'est un terminal ni comment installer Node ; vérifie simplement que tu
-as une version maintenue.}
+\paragraphe{Côté système, macOS, Linux, WSL et Windows natif sont pris en charge
+par les méthodes d'installation officielles. Sur Windows, installe aussi Git for
+Windows si tu veux que l'outil dispose d'un environnement Bash familier ; sinon,
+il peut s'appuyer sur PowerShell. Tu sais déjà coder, donc je ne t'explique ni
+ce qu'est un terminal ni comment installer Git : assure-toi simplement d'avoir
+un environnement maintenu.}
 
 \begin{extraitcode}{bash}
-# Vérifier qu'on a bien Node et npm avant de commencer
-node --version
-npm --version
+# Vérifier les outils de base avant de commencer
+git --version
 \end{extraitcode}
 
-\paragraphe{Si ces deux commandes renvoient un numéro de version, le terrain est
-prêt. Si Node manque ou date de plusieurs années, installe d'abord une version
-récente (idéalement la dernière LTS) avant d'aller plus loin. Un Node trop
-ancien est la cause numéro un des installations qui échouent sans message
-clair.}
+\paragraphe{Si cette commande renvoie un numéro de version, le terrain est prêt.
+Si ton projet utilise Node, Python, Go ou un autre runtime, vérifie-le aussi :
+Claude Code s'appuie sur les commandes de ton dépôt pour tester, construire et
+formater. L'agent n'a pas besoin d'un environnement magique ; il a besoin du
+même environnement que toi.}
 
 \begin{note}
-La distribution exacte de Claude Code peut évoluer : paquet \code{npm}
-aujourd'hui, installateur dédié ou binaire autonome demain. Le réflexe ne change
-pas : ouvre la page d'installation officielle, suis la méthode qui y est
-recommandée pour ton système, et reviens ici pour la suite.
+La distribution exacte de Claude Code peut évoluer. Le réflexe ne change pas :
+ouvre la page d'installation officielle, suis la méthode recommandée pour ton
+système, puis reviens ici pour la suite.
 \end{note}
 
 \section{Installer Claude Code et vérifier la version}
 
-\paragraphe{L'installation tient en une commande. À l'état 2026, Claude Code
-s'installe comme paquet global via \code{npm}.}
+\paragraphe{L'installation tient en général en une commande. À l'état 2026, les
+méthodes recommandées sont l'installateur natif, Homebrew sur macOS, et WinGet
+sur Windows. Choisis celle qui correspond à ton poste ; les commandes suivantes
+sont des repères, pas une promesse éternelle.}
 
 \begin{extraitcode}{bash}
-# Installation globale (méthode npm, état 2026)
-npm install -g @anthropic-ai/claude-code
+# macOS, Linux ou WSL : installateur natif
+curl -fsSL https://claude.ai/install.sh | bash
+
+# macOS avec Homebrew
+brew install --cask claude-code
+
+# Windows avec WinGet
+winget install Anthropic.ClaudeCode
 
 # Vérifier que la commande est disponible et connaître sa version
 claude --version
@@ -84,8 +94,10 @@ après une mise à jour.}
 \begin{astuce}
 Garde Claude Code à jour, mais pas en aveugle. Avant une montée de version sur
 un projet sérieux, jette un œil aux notes de version : une commande peut avoir
-changé de nom ou de comportement. \code{npm update -g @anthropic-ai/claude-code}
-met à jour ; \code{claude --version} confirme le résultat.
+changé de nom ou de comportement. L'installateur natif se met à jour
+automatiquement ; avec Homebrew ou WinGet, utilise le mécanisme de mise à jour
+du gestionnaire choisi. Dans tous les cas, \code{claude --version} confirme le
+résultat.
 \end{astuce}
 
 \section{Authentification et configuration minimale}
@@ -220,8 +232,8 @@ quand le contexte deviendra une ressource à gérer.
 \end{note}
 
 \resumeChapitre{
-  \element{\important{Prérequis} : un terminal, Node.js récent et un compte Anthropic suffisent pour démarrer — vérifie les versions avant d'installer.}
-  \element{\important{Installation et version} : installe Claude Code via npm et contrôle immédiatement la version affichée ; c'est elle qui détermine les fonctionnalités disponibles.}
+  \element{\important{Prérequis} : un terminal, Git et un compte Anthropic ou Claude suffisent pour démarrer — vérifie ton environnement de projet avant d'installer.}
+  \element{\important{Installation et version} : installe Claude Code avec la méthode officielle de ton système et contrôle immédiatement la version affichée ; c'est elle qui détermine les fonctionnalités disponibles.}
   \element{\important{Dépôt jouet} : lance ta première session sur un projet sans enjeu, jamais sur ton code de production, pour apprivoiser l'outil sans risque.}
   \element{\important{Répertoire de lancement} : l'agent travaille dans le dossier depuis lequel tu le lances — lancer depuis le bon endroit définit son périmètre d'action.}
   \element{\important{Session} : quitter la session efface le contexte accumulé ; reprends-la avec \code{--continue} quand tu veux retrouver l'historique précédent.}

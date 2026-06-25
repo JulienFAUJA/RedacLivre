@@ -6,8 +6,8 @@
 
 \introChapitre{
   Une fois les bases acquises, on industrialise ses gestes récurrents. Ce
-  chapitre, daté car très lié à l'outillage du moment, présente les slash
-  commands pour réutiliser des prompts, et les hooks pour automatiser des
+  chapitre, daté car très lié à l'outillage du moment, présente les skills et
+  commandes slash pour réutiliser des prompts, et les hooks pour automatiser des
   actions autour de l'agent. On transforme des manipulations répétées en
   raccourcis fiables.
 }
@@ -28,13 +28,14 @@ le format à la doc officielle courante. Si un champ ne fonctionne plus, c'est
 le signe qu'il a changé de nom, pas que l'idée est fausse.
 \end{avertissement}
 
-\section{Slash commands : encapsuler un prompt réutilisable}
+\section{Skills et slash commands : encapsuler un prompt réutilisable}
 
-\paragraphe{Une \terme{slash command} est une commande personnalisée, invoquée
-par un nom préfixé d'une barre oblique, qui encapsule un prompt réutilisable.
-Au lieu de réécrire à chaque fois « relis ce diff, vérifie la gestion d'erreurs
-et signale les cas limites oubliés », tu enregistres ce prompt une fois sous un
-nom court et tu l'appelles d'un \code{/relecture}.}
+\paragraphe{Dans Claude Code, un \terme{skill} est aujourd'hui la manière
+conseillée d'encapsuler un prompt réutilisable. Tu le ranges dans
+\code{.claude/skills/}, et il devient invocable comme une commande slash. Au
+lieu de réécrire à chaque fois « relis ce diff, vérifie la gestion d'erreurs et
+signale les cas limites oubliés », tu enregistres ce prompt une fois sous un nom
+court et tu l'appelles avec \code{/relecture}.}
 
 \paragraphe{L'intérêt n'est pas le gain de frappe. C'est la
 \emphase{constance}. Un prompt qui traîne dans ta tête varie selon ta fatigue ;
@@ -42,20 +43,25 @@ un prompt figé dans une commande s'applique toujours pareil, avec les mêmes
 exigences. Tu transformes une bonne formulation, trouvée un jour de lucidité,
 en un actif réutilisable par toi et par ton équipe.}
 
-\paragraphe{Concrètement, une slash command est un simple fichier texte rangé
-dans un dossier dédié du projet ou de ta configuration personnelle. Le nom du
-fichier devient le nom de la commande ; son contenu est le prompt. Tout
-l'écosystème repose sur cette idée minimale : du texte versionné dans le dépôt,
-lisible et modifiable comme n'importe quel fichier.}
+\paragraphe{Concrètement, un skill est un dossier contenant un fichier
+\code{SKILL.md}. Le nom du dossier devient le nom de la commande ; le contenu du
+fichier décrit ce que l'agent doit faire. Les anciens fichiers
+\code{.claude/commands/*.md} restent reconnus, mais les skills sont plus
+flexibles : ils peuvent embarquer des exemples, des scripts et des ressources de
+référence.}
 
-\section{Créer ta propre commande pour une tâche récurrente}
+\section{Créer ton propre skill pour une tâche récurrente}
 
 \paragraphe{Prenons une tâche que tu fais sans cesse : préparer un message de
-commit propre à partir des changements en cours. Tu crées un fichier dans le
-dossier des commandes du projet, par exemple
-\code{.claude/commands/commit.md}, et tu y déposes le prompt.}
+commit propre à partir des changements en cours. Tu crées un dossier
+\code{.claude/skills/commit/}, puis un fichier \code{SKILL.md} dedans.}
 
 \begin{extraitcode}{text}
+---
+name: commit
+description: Préparer un message de commit clair à partir du diff indexé
+---
+
 Lis le diff des fichiers indexés (git diff --cached).
 Rédige un message de commit en français, format Conventional Commits.
 Première ligne : 72 caractères maximum, à l'impératif.
@@ -63,22 +69,23 @@ Corps : explique le POURQUOI du changement, pas le QUOI.
 N'invente aucun ticket ni numéro. Ne commit pas toi-même : propose seulement.
 \end{extraitcode}
 
-\paragraphe{Désormais, \code{/commit} rejoue ce prompt à l'identique. Tu
+\paragraphe{Désormais, \code{/commit} charge ce skill et applique ces consignes.
+Tu
 remarques le dernier garde-fou : « ne commit pas toi-même ». Une bonne commande
 borne son propre périmètre. La commande la plus utile est souvent celle qui dit
 aussi à l'agent ce qu'il ne doit \emphase{pas} faire.}
 
 \begin{astuce}
-Versionne tes commandes dans le dépôt, sous \code{.claude/}. Elles deviennent
+Versionne tes skills dans le dépôt, sous \code{.claude/}. Ils deviennent
 alors un bien commun de l'équipe : la même \code{/relecture} s'applique pour
 tout le monde, et une amélioration profite à tous au prochain \code{git pull}.
-Garde-les courtes et mono-tâche ; une commande qui veut tout faire ne fait rien
+Garde-les courts et mono-tâche ; un skill qui veut tout faire ne fait rien
 de fiable.
 \end{astuce}
 
 \section{Hooks : déclencher une action à un moment précis du cycle}
 
-\paragraphe{Une slash command, c'est toi qui la déclenches. Un \terme{hook},
+\paragraphe{Un skill ou une commande slash, c'est toi qui le déclenches. Un \terme{hook},
 lui, se déclenche \emphase{tout seul}, à un moment précis du cycle de l'agent.
 C'est une action automatique attachée à un événement : avant qu'une commande
 shell s'exécute, après qu'un fichier a été modifié, à la fin d'une réponse.
@@ -90,25 +97,34 @@ de personne. C'est ce qui en fait un excellent support de garde-fou :
 une règle qui ne s'applique que « quand on y pense » n'est pas une règle.}
 
 \paragraphe{Un hook se configure dans les réglages, en associant un événement à
-une commande shell. Voici l'idée, en pseudo-configuration : à chaque écriture
-de fichier, on lance le formateur.}
+un ou plusieurs gestionnaires. Voici un modèle réaliste : après une modification
+de fichier, Claude Code appelle un script de formatage. Le script reçoit le
+contexte de l'action en JSON sur son entrée standard ; il ne dépend donc pas de
+variables inventées.}
 
 \begin{extraitcode}{json}
 {
   "hooks": {
     "PostToolUse": [
       {
-        "matcher": "Write|Edit",
-        "command": "npx prettier --write \"$FICHIER_MODIFIE\""
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/format-edited-file.sh"
+          }
+        ]
       }
     ]
   }
 }
 \end{extraitcode}
 
-\paragraphe{Les noms exacts des événements et des variables changent selon les
-versions : c'est précisément le genre de détail que l'avertissement d'ouverture
-te demande de vérifier. Retiens la \emphase{forme}, pas les mots-clés.}
+\paragraphe{Le script \code{format-edited-file.sh} lit alors le chemin modifié
+dans le JSON reçu, par exemple avec \code{jq}, puis lance le formateur du projet.
+Les noms exacts des événements et des champs restent à vérifier dans la doc de
+ta version, mais la forme importante est celle-ci : configuration dans
+\code{settings.json}, script versionné, entrée structurée sur \code{stdin}.}
 
 \section{Cas d'usage concrets : formatage, tests, garde-fous}
 
@@ -136,10 +152,20 @@ selon une logique fine que tu écris toi-même. Les deux mécanismes se cumulent
 
 \begin{extraitcode}{bash}
 #!/usr/bin/env bash
-# Hook pré-exécution : refuse toute suppression récursive forcée.
-if echo "$COMMANDE" | grep -qE 'rm +-[a-z]*r[a-z]*f'; then
-  echo "Suppression récursive bloquée par le garde-fou." >&2
-  exit 1   # un code non nul annule l'action de l'agent
+# .claude/hooks/block-rm.sh
+# Hook PreToolUse : refuse toute suppression récursive forcée.
+COMMAND=$(jq -r '.tool_input.command // ""')
+
+if echo "$COMMAND" | grep -qE 'rm +-[a-z]*r[a-z]*f'; then
+  jq -n '{
+    hookSpecificOutput: {
+      hookEventName: "PreToolUse",
+      permissionDecision: "deny",
+      permissionDecisionReason: "Suppression récursive bloquée par le garde-fou."
+    }
+  }'
+else
+  exit 0
 fi
 \end{extraitcode}
 
@@ -190,7 +216,7 @@ au chapitre précédent. Cible tes hooks (un seul module, pas tout le dépôt) e
 mesure leur durée.}
 
 \resumeChapitre{
-  \element{\important{Slash commands} : encapsule un prompt récurrent dans un fichier texte versionné — la constance d'une bonne formulation figée vaut plus que la variabilité d'un prompt réécrit de tête.}
+  \element{\important{Skills et commandes} : encapsule un prompt récurrent dans un \code{SKILL.md} versionné — la constance d'une bonne formulation figée vaut plus que la variabilité d'un prompt réécrit de tête.}
   \element{\important{Hooks} : attachés à un événement du cycle, ils s'appliquent sans que tu y penses — formatage après chaque modification, tests après chaque écriture, blocage avant une commande risquée.}
   \element{\important{Composition} : la commande porte l'intention, les hooks garantissent les invariants pendant l'exécution — les deux se cumulent pour un workflow fiable de bout en bout.}
   \element{\important{Automatiser au bon moment} : fige un geste seulement quand tu l'as répété assez pour en connaître la bonne forme — cristalliser trop tôt fige une mauvaise version.}

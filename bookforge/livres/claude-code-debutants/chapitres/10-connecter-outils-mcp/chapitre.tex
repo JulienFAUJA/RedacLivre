@@ -60,35 +60,37 @@ liste d'outils. C'est tout l'intérêt d'un protocole standard, tu raisonnes en
 
 \section{Brancher un premier serveur MCP}
 
-\paragraphe{La configuration tient dans un fichier. Tu déclares chaque serveur :
-un nom, la commande qui le lance, et ses éventuels paramètres. Voici une
-intégration de recherche documentaire, branchée sur tes pages internes.}
+\paragraphe{La configuration tient dans un fichier ou dans la commande
+\code{claude mcp add}. Tu déclares chaque serveur : un nom, son mode de
+connexion, et ses éventuels paramètres. Voici un modèle d'intégration de
+recherche documentaire distante. Les valeurs en majuscules sont à remplacer par
+celles de ton équipe ; ce n'est pas un paquet public à installer tel quel.}
 
 \begin{extraitcode}{json}
 {
   "mcpServers": {
     "docs-interne": {
-      "command": "npx",
-      "args": ["-y", "@exemple/mcp-docs"],
-      "env": {
-        "DOCS_URL": "https://wiki.interne.exemple",
-        "DOCS_TOKEN": "${DOCS_TOKEN}"
-      }
+      "type": "http",
+      "url": "https://MCP_DOCS_DE_TON_EQUIPE.example/mcp",
+      "headersHelper": "./scripts/mcp-docs-headers.sh"
     }
   }
 }
 \end{extraitcode}
 
-\paragraphe{Note le \code{$DOCS_TOKEN} : le secret ne vit pas en clair dans le
-fichier, il vient d'une variable d'environnement. On verra plus loin pourquoi ce
-réflexe compte. Une fois le fichier en place, tu vérifies que le serveur est bien
-vu par l'agent.}
+\paragraphe{Le script \code{headersHelper} fournit les en-têtes d'authentification
+au moment de l'appel. Le secret ne vit donc pas en clair dans le fichier de
+configuration. On verra plus loin pourquoi ce réflexe compte. Une fois le
+serveur ajouté, tu vérifies qu'il est bien vu par l'agent.}
 
 \begin{extraitcode}{bash}
+# Ajouter un serveur MCP HTTP au niveau du projet
+claude mcp add --transport http docs-interne --scope project https://MCP_DOCS_DE_TON_EQUIPE.example/mcp
+
 # Lister les serveurs MCP connus de la session
 claude mcp list
 
-# Demarrer une session et inspecter les outils charges
+# Démarrer une session et inspecter les outils chargés
 claude
 > /mcp
 \end{extraitcode}
