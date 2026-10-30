@@ -1,5 +1,7 @@
 # BookForge
 
+Pour les commandes SoftHUB, installer le SDK dans le Python qui lance BookForge avec `python -m pip install -r ../requirements-sdk.txt` depuis `bookforge/`. Le paquet fournit `softhub_sdk` et `softhub_commands` aux adaptateurs SoftHUB de BookForge.
+
 Système de rédaction de livres en LaTeX par agents Claude Code parallèles.
 
 ## Principe directeur : séparation stricte **contenu ↔ style**
